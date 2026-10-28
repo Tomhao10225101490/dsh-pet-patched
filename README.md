@@ -1,3 +1,4 @@
+> **Note:** This is a patched repository based on PC2005-cloud/dsh-pet. Code is MIT licensed, assets are non-commercial, and the character is licensed CC BY-NC-SA 4.0. See FORK-NOTES.md and PATCHES.md for the changes.
 # dsh-pet 🐾
 
 <p align="center">
