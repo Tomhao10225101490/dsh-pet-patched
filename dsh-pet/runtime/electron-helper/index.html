@@ -85,7 +85,7 @@
         background: rgba(255, 255, 255, 0.92);
         color: #2b2b2b;
         /* 字体族走全局配置变量（renderer.js 注入到 documentElement）：对话窗/得分弹窗挂在 body 下、
-           继承不到宠物根容器，气泡也统一从这里取；回退参数是变量未注入时的默认字体栈 */
+           继承不到宠物根容器，气泡也统一从这里取；回退参数 = 改造前的原栈 */
         font-family: var(
           --dsh-pet-font-family,
           'ShangshouSoftCandy',
@@ -127,6 +127,23 @@
       }
       .pet-bubble.is-on {
         opacity: 1;
+      }
+      /* 余额小标签：收起态余额不做大白泡泡，直接贴在头顶的小药丸——
+         无小尾巴、内边距和字号都缩一档，数字一眼能看清又不挡宠物；
+         bottom 从原来的 100% - 尺寸×0.108 改成 100% - 尺寸×0.22，
+         也就是再往下挪约 0.112×尺寸（320 体型约 36px），让标签压在头顶上、
+         而不是悬在头顶上方（碎碎念/对话气泡不受影响，仍用原来的位置） */
+      .pet-bubble.is-balance {
+        bottom: calc(100% - var(--pet-size, 462px) * 0.22);
+        min-width: 0;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: calc(var(--f) * 0.8);
+        line-height: 1.4;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+      }
+      .pet-bubble.is-balance::after {
+        display: none;
       }
       /* 碎碎念变体：与浏览器 overlay 一致 —— 字号缩到余额气泡的 0.75、宽度下限更窄（0.10 → 2.1978），
          上限与余额气泡相同；宽度取宽/折行规则继承 .pet-bubble，高度随行数自然增长 */
@@ -260,17 +277,10 @@
     <div id="root"></div>
     <div id="pet-error" class="pet-error"></div>
     <!-- 共享纯逻辑（src/shared 的 iife 构建产物，window.PetShared）——经经典 script，避开 file:// ESM 的 CORS 限制。
-         桌面端同模式拆分：shared-core（纯逻辑）→ constants（基础设施）→ sprite（宠物本体与几何）→ sprite-*（原型扩展，
-         须排在 sprite.js 之后）→ events（事件联动）→ renderer（启动入口） -->
+         桌面端同模式拆分：constants（基础设施）→ sprite（宠物本体）→ events（事件联动）→ renderer（启动入口） -->
     <script src="./shared-core.js"></script>
     <script src="./constants.js"></script>
     <script src="./sprite.js"></script>
-    <script src="./sprite/init.js"></script>
-    <script src="./sprite/playback.js"></script>
-    <script src="./sprite/motion.js"></script>
-    <script src="./sprite/input.js"></script>
-    <script src="./sprite/bubble.js"></script>
-    <script src="./sprite/menu.js"></script>
     <script src="./events.js"></script>
     <script src="./renderer.js"></script>
   </body>
