@@ -1,0 +1,27 @@
+// 可选的用户层配置示例，不是程序默认值。
+// 包内默认在 dsh-pet/assets/config.jsonc：主宠物宽 462，display 为 both，配图开关为开。
+// 用法：复制到 $DSH_HOME/dsh-pet/main-config.jsonc（未设置 DSH_HOME 时即 ~/.dsh/dsh-pet/）。
+// pets 一旦写了，就是整表替换，所以这里带上必填开关。
+// 不要把 API key 写进这个文件。密钥只放在本机 standalone-ai.json，由 AI 设置页保存。
+{
+  "chatMemoryRounds": 5,
+  "whisperImageEnabled": false,
+  "chatImageEnabled": false,
+  "pets": [
+    {
+      "name": "蓝毛小女仆",
+      "id": "main",
+      "size": 320,
+      "balanceEnabled": true,
+      "whisperEnabled": true,
+      "workStatusEnabled": true,
+      "fixedEnabled": false,
+      "display": "desktop",
+      "position": {
+        "corner": "top-right",
+        "marginX": 24,
+        "marginY": 100
+      }
+    }
+  ]
+}

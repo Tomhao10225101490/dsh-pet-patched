@@ -1,7 +1,26 @@
+# 依赖与构建产物（补丁所在的 lib/*.js、runtime/ 已入库，不要把整个 dsh-pet/ 忽略掉）
 node_modules/
-dsh-pet/
+dist/
+dist-app/
+coverage/
+*.tsbuildinfo
+
+# 日志与系统垃圾
 *.log
 .DS_Store
+Thumbs.db
+
+# 密钥与本机运行时数据。这些文件出现在仓库任意位置都不要提交。
+.env
+.env.*
+!.env.example
+*.pem
 standalone-ai.json
+standalone-runtime.json
 memory.json
 main-config.jsonc
+logs.txt
+
+# 若有人在仓库里解压 Electron，不要把二进制提交上来
+.electron/
+dsh-pet/dist-app/

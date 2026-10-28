@@ -27,8 +27,14 @@ README 里必须如实写明。
 - 返回格式和 `deepseek-official` 一模一样（money 形状 + wallets + tier），
   所以宠物自带的余额动画 + 气泡照常工作。
 - 密钥只在本机读，不打印、不外发。`standalone-ai.json` 本身绝不能进仓库。
-- 上游独立模式原文：余额、碎碎念、对话“不可用”；本补丁只解决了余额，
-  碎碎念/对话在独立模式下的行为仍以上游说明为准。
+- 本仓库 `src/standalone/` 里，碎碎念和对话本来就可以在本机 AI 设置页打开
+  （这是随 v0.3.8 源码进来的，不是本文件第 6 节那个「把对话写长」的补丁）。
+  上游旧 README 把这三样都写成独立模式不可用，那个说法对不上当前源码。
+- 启动横幅（`lib/standalone.js` 里那行「不可用 余额 / 会话工作状态 / DSH 系统通知」）
+  没有跟着改。配好 DeepSeek 官方密钥后，右键「查看余额」会走 `standaloneBalance`。
+  工作状态和 DSH 系统通知仍然要 DSH 宿主。
+- 本补丁只加了独立模式的 DeepSeek 余额。DSH 插件宿主入口 `lib/index.js` 不在本检出里，
+  所以这条余额路径目前只随 `node lib/standalone.js` 生效。
 
 ## 2. 余额常驻头顶 + 小药丸标签（lib/client.js、shared-core.js、events.js、index.html、sprite.js）
 - 余额气泡不再 10 秒自动收起：三处定时器全部改成 `bubbleTimer = null`。
@@ -82,6 +88,6 @@ README 里必须如实写明。
 - `~/.dsh/dsh-pet/standalone-ai.json`（DeepSeek 密钥）、`memory.json`（对话记忆）。
 - 用户本人的 `main-config.jsonc`、LaunchAgent 自动启动配置、
   桌面启动器（`~/Desktop/大肥鱼.*`）、Electron 缓存。
-- 上游 `package.json` 里的 `homepage` / `repository` 仍指向
-  PC2005-cloud/dsh-pet， fork 或新仓库发布前必须改成自己的地址，
-  否则会误导别人以为这是上游原仓库。
+- `dsh-pet/package.json` 的 `homepage` / `repository` / `bugs` 已指向
+  Tomhao10225101490/dsh-pet-patched，`repository.directory` 为 `dsh-pet`。
+  不要改回上游地址，也不要把它发布成 npm 上的 `dsh-pet`（那是上游包）。
