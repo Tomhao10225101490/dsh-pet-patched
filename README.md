@@ -1,443 +1,503 @@
-> **Note:** This is a patched repository based on PC2005-cloud/dsh-pet. Code is MIT licensed, assets are non-commercial, and the character is licensed CC BY-NC-SA 4.0. See FORK-NOTES.md and PATCHES.md for the changes.
-# dsh-pet 🐾
+# dsh-pet 社区补丁版
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/dsh-pet"><img alt="npm version" src="https://img.shields.io/npm/v/dsh-pet?label=npm&color=blue"></a>
-  <a href="https://www.npmjs.com/package/dsh-pet"><img alt="npm monthly downloads" src="https://img.shields.io/npm/dm/dsh-pet?label=%E6%9C%88%E4%B8%8B%E8%BD%BD&color=brightgreen"></a>
-  <a href="https://www.npmjs.com/package/dsh-pet"><img alt="total downloads" src="https://img.shields.io/npm/dt/dsh-pet?label=%E6%80%BB%E4%B8%8B%E8%BD%BD&color=success"></a>
-  <a href="https://github.com/PC2005-cloud/dsh-pet"><img alt="stars" src="https://img.shields.io/github/stars/PC2005-cloud/dsh-pet?style=social"></a>
-  <a href="https://github.com/PC2005-cloud/dsh-pet/blob/main/LICENSE"><img alt="license" src="https://img.shields.io/github/license/PC2005-cloud/dsh-pet?color=orange"></a>
-  <a href="https://awesome-dsh-plugin.com"><img alt="awesome dsh plugin" src="https://awesome-dsh-plugin.com/badge.svg"></a>
-  <a href="https://github.com/PC2005-cloud/dsh-pet"><img alt="repo size" src="https://img.shields.io/github/repo-size/PC2005-cloud/dsh-pet"></a>
-  <a href="https://github.com/PC2005-cloud/dsh-pet/issues"><img alt="issues" src="https://img.shields.io/github/issues/PC2005-cloud/dsh-pet"></a>
-  <img alt="platform" src="https://img.shields.io/badge/platform-DeepSeek%20Harness%20Web-8A2BE2">
-  <img alt="assets" src="https://img.shields.io/badge/assets-dynamic%20animations-ff69b4">
-</p>
+[English](#english)
 
-一只住在 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 里的桌面宠物：待机呼吸、随机动作（打瞌睡、玩魔方、吃火锅……）、左右转向、屏幕漫游、点击 Q 弹、拖拽甩抛反弹、右键菜单点播——一百余个透明动画随时无缝衔接；还能跟随 DSH 会话事件切换工作状态动画、按档位播放余额动画 + 头顶气泡、碎碎念与对话聊天、窗口失焦时弹系统通知。可多开同屏，能脱离浏览器住上**桌面**（透明置顶小窗），也能自己添加**全新宠物种类**（pet pack）。
+这是 [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet) **v0.3.8** 的社区补丁仓库，不是上游的新版本，也不是从零写的桌宠。角色是社区二创的 DeepSeek「大肥鱼」（蓝发鲸鱼女仆），住在桌面透明小窗里，也能作为 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 插件跑在网页里。
 
-这不是一个普通插件，而是**完整的三件套项目**：
+**现在这份检出可以直接跑的，是不打开 DSH 的独立桌面模式。** 已提交的补丁写在构建产物里，不在 `src/` 里。克隆之后先按下面的步骤启动，不要先跑 `npm run build`。
 
-```
-① 提示词（配方）    →  ② 素材生成链（引擎）  →  ③ 插件（成品）
-AI 生成动画的配方     源视频 → 透明动画的管线    运行在 DSH 里的宠物
-```
+| | |
+| --- | --- |
+| 上游 | https://github.com/PC2005-cloud/dsh-pet （包版本 0.3.8） |
+| 本仓库 | https://github.com/Tomhao10225101490/dsh-pet-patched |
+| 插件包 | `dsh-pet/`，`package.json` 的 `version` 仍是 `0.3.8` |
+| 代码许可 | MIT（Copyright (c) 2026 PC2005-cloud） |
+| 素材 | 允许开源使用，禁止商用 |
+| 形象 | [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans)，禁止商用 |
 
-任何人 clone 本仓库，都可以**从零生成自己的桌面宠物**——换角色、换动作、换风格，全流程可复现。
+补丁逐条说明见 [PATCHES.md](PATCHES.md)，许可与归属见 [FORK-NOTES.md](FORK-NOTES.md)。
 
 ---
 
-## 快速开始（安装插件）
+## 这是什么
 
-装法取决于你在用哪个 DSH：
+仓库是三件套，不只是一个插件目录：
 
-### 🪟 桌面应用（Electron 版）
-
-直接在应用内「插件管理」页的安装框里填 `dsh-pet`，不用开终端；需要在终端里操作插件时，用桌面应用自带的那份 CLI。
-
-### 🌐 `dsh web`
-
-> 以下命令都在你的**命令行终端**（PowerShell / CMD 等）中运行。前提是 DSH 环境已就绪：
-
-```sh
-# ① 前置要求：确认 Node.js 已安装
-node -v
-
-# ② 安装 DSH 启动器与 pnpm（已装可跳过；装完请重新打开终端）
-npm install -g @deepseek-ai/dsh pnpm
-dsh --version   # 验证 dsh 命令可用
-
-# ③ 安装本插件（web 模式用 --profile web）
-dsh plugin --profile web add dsh-pet
+```
+① prompts/     动画生成提示词
+② scripts/ + video/   源视频 → 透明动画的素材链
+③ dsh-pet/     真正跑起来的桌宠（源码、已打补丁的产物、素材、桌面窗口）
 ```
 
-装完**重开桌面应用**（`dsh web` 用户则重启 `dsh web`）才生效——运行中的进程持有内存里的旧插件。宠物出现在界面右上角（默认配置角落，可在设置页修改）。
+桌宠本身做这些事：一百余段透明动画首尾相接、点击和拖拽、甩出去会反弹、右键点播动作、多只同时存在、按余额档位换动画、碎碎念、对话、跟随 DSH 会话切换工作状态。桌面模式为每只宠物开一个跟着走的透明置顶小窗，不铺满屏幕。
 
-> **兼容性**：本插件当前在 dsh **`0.2.1-rc.2`** 下开发并测试（`dsh --version` 可查看你的版本）。建议使用相同版本；其他版本如遇问题欢迎反馈。
+本仓库在上游之外多出来的行为，全部记在已提交的产物里：
 
-### 从源码安装（clone 本仓库后）
+- `dsh-pet/lib/standalone.js`
+- `dsh-pet/lib/client.js`
+- `dsh-pet/runtime/electron-helper/shared-core.js`
+- `dsh-pet/runtime/electron-helper/sprite.js`
+- `dsh-pet/runtime/electron-helper/events.js`
+- `dsh-pet/runtime/electron-helper/index.html`
 
-`lib/` 构建产物不入库，clone 后需要先构建再安装：
+`src/` 没有这些改动。`npm run build`（`scripts/prepare.js`）会用 `src/` 重新生成 `lib/` 和 `shared-core.js`，把前三个文件里的补丁盖掉。`sprite.js`、`events.js`、`index.html` 是手写运行时，构建脚本不会重写它们，但共享层一旦被盖掉，余额标签会和手写层对不齐。所以：**日常启动不要构建。** 对照用的 diff 在 `patches/`，那些 diff 的路径是当时打包机上的绝对路径，不能在本仓库里直接 `git apply`。
 
-```sh
-# ① clone 本仓库，进入插件目录
-git clone https://github.com/PC2005-cloud/dsh-pet.git
-cd dsh-pet/dsh-pet
+---
 
-# ② 安装依赖
-npm install
+## 和上游差在哪里
 
-# ③ 构建（完整 lib：tsdown → lib + 桌面共享核心 + 类型声明）
-npm run build       # 必须手动跑一次（克隆后 npm install 不再自动构建）
+上游独立模式的旧 README 写过「余额、碎碎念、对话都不可用」。本仓库的源码（`src/standalone/`）其实已经能在本机 AI 设置页里打开碎碎念和对话。补丁是在这个基础上又改了六处：
 
-# ④ 安装到 DSH（file: 指向**插件目录**——上面 cd 进去的那一层，用构建好的 lib）
-#    --profile 填实际在用的那个：dsh web → web；
-#    桌面应用（Electron 版）改用应用内「插件管理」安装，见上方快速开始
-dsh plugin --profile web add file:D:/path/to/dsh-pet/dsh-pet
-```
+| # | 行为 | 落在哪 |
+| --- | --- | --- |
+| 1 | 独立模式可以查 DeepSeek 官方余额。读本机 `$DSH_HOME/dsh-pet/standalone-ai.json` 里的密钥，请求 `https://api.deepseek.com/user/balance`。`baseUrl` 不含 `api.deepseek.com` 就直接报错，不拿别的接口去试。返回形状与上游 `deepseek-official` 相同，所以原有余额动画和气泡还能用。 | 只在 `lib/standalone.js`。DSH 宿主模式仍走 DSH 凭据，不读这个文件。 |
+| 2 | 余额气泡不再 10 秒后消失。下一轮刷新（默认 1800 秒）就地改数字。对话或碎碎念气泡优先级更高，挡完之后余额标签回来。收起态改成头顶小药丸（CSS 类 `is-balance`），位置更低，贴着头顶。展开三窗口读数时仍是大盒子。 | `lib/client.js`、`shared-core.js`、`events.js`、`index.html`、`sprite.js` |
+| 3 | 余额文案去掉「峰/谷」。数字按固定汇率换成整数后仍画成 `¥`：USD × 1325、CNY × 187（2026-10-27 的显示用汇率）。底层钱包金额和币种不变，这不是人民币余额，汇率也不会自己更新。 | `lib/client.js` 与 `shared-core.js` 的 `moneyRows` |
+| 4 | 双击宠物打开对话。对话已经开着时不重复打开，也不关闭。拖拽过程中不触发。macOS 上 **Command + 双击** 仍是呼出 DSH，不会被抢成对话。双击前那两下单击的点击动画仍会各播一次，这是 DOM 事件顺序，不是故障。 | `lib/client.js`、`sprite.js` |
+| 5 | 对话框加宽到大约 320–480px，输入区最高 320px，内部滚动，长文本不再被裁掉；变大之后会重新夹回窗口或屏幕里。 | `lib/client.js`、`shared-core.js` |
+| 6 | 只在对话的 system prompt 末尾追加一段说明：「20 字以内」只约束碎碎念；对话按完整回答来写。碎碎念提示词本身没改。独立模式单次输出上限默认 1024、最高 4096，长回答要在 AI 设置里把上限调到 4096 才出得来。 | `lib/standalone.js` 的 `chatWithPet` |
 
-> 注：`npm run build`（即 `scripts/prepare.js`）才产出**完整可安装**的 lib——除 tsdown 构建外还构建桌面共享核心（`shared-core.js`）、生成类型声明并收敛发布 `files` 清单；裸 `tsdown` 构建会缺桌面运行时与类型。发布与打包（`npm publish` / `npm pack`）时由 `prepack` 自动调用它，克隆仓库后需手动跑一次。
+另外两件容易误当成「代码功能」的事，**不在仓库里**：
 
-### 安装后你会看到什么
+- 有人把宠物宽度从包内默认 462 改成 320，并关掉碎碎念配图、对话配图、把记忆轮数设为 5。那是用户目录里的 `main-config.jsonc`，不是本仓库的默认值。可选示例见 [docs/example-user-config.jsonc](docs/example-user-config.jsonc)。
+- 启动横幅里仍有一行 `不可用      余额 / 会话工作状态 / DSH 系统通知`。余额这一词是补丁没改到的旧文案。独立模式在保存了 DeepSeek 官方密钥之后，右键「查看余额」会走上面的第 1 条。工作状态和 DSH 系统通知确实仍要 DSH 宿主。
 
-默认配置是 `display: "both"`（浏览器与桌面都显示），所以重开 DSH 之后会依次出现两处，不必手动开：
+`patches/01`–`06` 是上述改动的原始 diff。细节、以及「不要把密钥提交进来」的约束，以 [PATCHES.md](PATCHES.md) 为准。
 
-1. **浏览器端先出现。** 宠物落在界面右上角（默认角落，设置页可改），此时桌面上还是空的。
-2. **宿主自动补桌面运行时。** 本机没有 Electron 时，插件会自己下载一份（落在 `~/.dsh/electron`，同一版本只下一次；默认走 npmmirror 镜像）。进度直接打在 DSH 的控制台里，形如：
+---
 
-   ```
-   [dsh-pet] Electron not found, downloading to <用户目录>/.dsh/electron/electron.exe ...
-   [dsh-pet] Electron not found, downloading v43.3.0 (win32-x64) ...
-   [dsh-pet] downloading 42.3MB / 104.1MB
-   [dsh-pet] download complete (37.5s), extracting to <用户目录>/.dsh/electron ...
-   ```
+## 功能亮点
 
-   这一步在**后台**进行，浏览器里的宠物照常可用；要等多久取决于网速（几十秒到几分钟），期间不用管它。
-3. **桌面端随后出现。** 解压完自动拉起桌面 Helper，同一只宠物以透明窗形式落到桌面上——**此时屏幕上一共两只**：浏览器里一只、桌面上那只，共用同一份配置与同一套动画。
-4. **想只留一只。** 两条路都行，改完即时生效：
-   - **设置页**：选中该宠物 →「显示位置」下拉框 → 仅浏览器 / 仅桌面 / 两者都显示 / 都不显示；
-   - **宠物右键**：菜单里的「显示位置」子菜单 → 仅网页 / 仅桌面 / 两者 / 都不（不用回设置页）。
+下面是上游就已经有、本仓库照常保留的能力。和补丁冲突的地方以上一节为准。
 
-> 已经装过 Electron（或设了 `DSH_PET_ELECTRON_PATH` 指向现成可执行文件）时，第 2 步会跳过，桌面端几乎立刻出现。下载失败**只影响桌面模式**：控制台会给出提示，浏览器里的宠物不受影响；网络受限时可以设 `DSH_PET_ELECTRON_MIRROR` 换镜像、`DSH_PET_ELECTRON_VERSION` 指定版本，重启后再试。
+- **动画链**：每段（含待机）播完按权重选下一段。默认 idle 10 / turn 5 / move 5，再加分类权重，都在 `dsh-pet/assets/config.jsonc`。
+- **事件动画**：余额、碎碎念、工作状态按档位播专属动画。档位可以写成候选数组，触发时档内随机，循环播放时轮换，避免连着同一段。
+- **多开**：设置页或配置文件里增加 `pets[]`。每只独立大小、位置、开关。
+- **屏幕漫游**：朝面朝的方向走，先看边界。多屏按各屏工作区判断。`confineToScreen: true` 时只留在当前这块屏。
+- **点击 / 拖拽 / 甩抛**：点击有回应动画和 Q 弹。拖拽过阻尼弹簧跟手。甩出后抛物线飞行，碰边反弹，落地摩擦停住再弹一下。轻放则停在原地。物理在 `dsh-pet/src/shared/physics.ts`，浏览器和桌面共用。
+- **右键菜单**：动作 → 分类 → 某一段。移动类点播会真的走一段。桌面端工具项包含「打开 AI 设置」（DSH 桌面应用宿主里这一项会变成「打开软件」）、查看余额、碎碎念、对话、回到初始位置、重载配置。
+- **朝向**：动画可以镜像。脚底线对齐，站在同一地面上。
+- **切换**：双缓冲交叉淡入。`prefers-reduced-motion` 时跳过 Q 弹和淡入。
+- **余额**：按已用百分比分六档（钱袋满溢 → 金袋叮当 → 钱袋如常 → 数金皱眉 → 袋空如洗 → 分文不剩）。DeepSeek 官方看账户余额；OpenCode Zen Go 与 Command Code 看最紧迫的额度窗口。没登记余额接口的服务商不静默，改弹文字说明。每只宠物用 `balanceEnabled` 单独开关。本仓库的显示层见上一节第 2、3 条。
+- **碎碎念与对话**：碎碎念按 `eventsRefreshSec.whisper`（默认 300 秒）自动来一句，也可右键手动触发。对话记忆写在 `$DSH_HOME/dsh-pet/memory.json`，浏览器和桌面读同一份。可以附图（上传、拖拽、粘贴、截屏）；图只跟这一轮请求，不进记忆、不进气泡。独立模式的开关在本机 AI 设置页，不走 DSH 凭据。
+- **工作状态**：只在 DSH 里有会话可听。六档：思考 / 工作 / 整理 / 等待 / 成功 / 出错。独立模式没有这条。
+- **系统通知**：DSH 窗口失焦时的系统 toast（完成、失败、截断、权限、需要选择）。独立模式没有这条。
+- **桌面小窗**：`display` 为 `desktop` 或 `both` 的每只宠物一个窗口。数据走宿主进程和 Electron 之间的管道，不依赖 DSH 的 HTTP 闸门。管道由程序自己打开（环境变量 `DSH_PET_BRIDGE=1`，行前缀 `dsh-pet-bridge:`）。这不是一条要用户去填的本机路径，也不存在单独的 live-bridge 安装包。
+- **pet pack**：在用户数据目录的 `pet/` 下放 `种类名-config.json` 和 `种类名-animation/`，就是一套新的动画池。见 [CONFIG.md](CONFIG.md)。
+- **自定义动画**：把 VP9-Alpha 的 `.webm` 放到 `$DSH_HOME/dsh-pet/main-animation/webm/`，文件名与配置里的动画名一致（不含扩展名）。主宠物优先用这里的文件，没有再回落到包内 `dsh-pet/assets/webm/`。
+- **对外接口**：DSH 页面里还有 HTTP（前缀 `/dsh-pet-7340`，只监听本机）和 Cordis 服务 `petApi7340`。契约在 [API.md](API.md)、[openapi.yaml](openapi.yaml)、[CORDIS.md](CORDIS.md)、[CORDIS-API.md](CORDIS-API.md)。
 
-## 插件功能
-
-- **纯粹的桌宠**：不做天气、监控等无关功能，不碰 DSH 内核；可选能力只有下面这些（余额 / 碎碎念 / 对话 / 工作状态 / 系统通知）
-- **动画链**：每个动画（含待机）播完即按权重选下一个（默认 idle 10 / turn 5 / move 5 + 分类权重，`config.jsonc` 可调），首尾相接
-- **事件动画**：余额 / 碎碎念 / 工作状态按档位触发专属动画；档位支持候选数组——触发时档内随机、循环播放自动轮换，避免连播同一段
-- **多开**：同时显示多个宠物，各自独立大小与位置（设置页「桌宠配置」添加/删除）
-- **屏幕漫游**：朝朝向方向行走，先探测空间、不走出屏幕（多屏按各屏边界判定；设置页「锁定在当前屏幕」开启后只在当前所在那块屏内走）
-- **点击 / 拖拽 / 甩抛**：点击有回应动画并 Q 弹挤压；拖拽过阻尼弹簧跟手，甩出即抛物线飞行、屏幕边缘反弹、落地摩擦停稳并 Q 弹一下；温柔放下原地停住；两端同一套纯函数物理与挤压曲线（`dsh-pet/src/shared/physics.ts`）
-- **右键菜单**：「动作 → 分类 → 具体动画」任意点播（移动类动画点播会真实行走一段）；工具项——浏览器端：碎碎念 / 对话 / 回到初始位置；桌面端：+ 打开网站、查看余额（余额启用时显示）、重载配置（改完配置文件直接右键重载全部桌面宠物，不必回设置页点保存）
-- **「打开网站」按宿主自动分派**：宠物宿主是 **DSH 桌面应用**时，该项自动变成「打开 DeepSeek Harness」——用应用自注册的 `dsh://open` 协议把桌面应用主窗口唤到前台（已运行则前置、未运行则拉起）；宿主是 `dsh web` / 独立模式时，仍是系统默认浏览器打开站点
-- **朝向与落地**：全部动画可镜像（可朝左 / 朝右）；脚底线统一，宠物始终站在地面上
-- **流畅切换**：双缓冲交叉淡入，切换无空白帧
-- **余额展示**：按已用百分比分档播余额动画 + 头顶联想气泡（10 秒自动消失）；DeepSeek 显示账户余额，OpenCode Zen Go 与 Command Code 显示最紧迫的一个额度窗口；**未登记余额接口的服务商改为弹文字说明**（不静默）；按宠物独立开关
-- **碎碎念与对话**：碎碎念按周期自动生成一句（说话动画 + 气泡，也可手动触发）；对话在右键弹输入框与宠物聊天，还能附一张图（上传 / 拖拽 / 粘贴 / 截屏），记忆持久化（浏览器 / 桌面共享同一份）
-- **工作状态联动**：监听 DSH 会话事件，切「思考 / 工作 / 整理 / 等待 / 成功 / 出错」档位动画 + 常驻气泡；目标多轮任务只在真正收尾轮庆祝
-- **系统通知**：窗口失焦时弹系统 toast（对话完成 / 生成失败 / 输出截断 / 权限申请 / 用户选择）
-- **桌面模式（可选）**：每只宠物开一个独立透明置顶局部小窗，与浏览器严格同行为、共用同一份素材与纯逻辑（见下节）
-- **pet pack（额外宠物种类）**：`pet/` 下建 `种类名-config.json` + `种类名-animation/` 即新增独立动画池与素材的全新种类，多实例共享素材（见 [CONFIG.md](CONFIG.md) 的「方式四」）
-- **自定义动画**：往 `main-animation/webm/` 放 VP9-Alpha 的 `.webm` 即为新动画，优先于包内素材
-- **无障碍**：支持 `prefers-reduced-motion`（减少动效时跳过 Q 弹挤压与淡入切换）
-
-## 🔌 对外接口（供其他插件调用）
-
-桌宠不只自己玩，也**对外开放两条调用通道**，让别的插件或脚本能驱动它、读它的状态。
-
-- **能做什么**：让它说一句指定的话、播一段指定动画、与它对话；读它当前说的话、工作状态、系统通知与余额
-- **为什么开放**：桌宠不该只是个摆设——比如一个「女仆」插件巡检验完想说句话，就能让桌宠当它的「实体」开口；也方便任何人基于它做二次开发
-- **通道一 · HTTP**：挂在 DSH 自己的 Web 服务上（前缀 `/dsh-pet-7340`，只监听本机、无鉴权），跨进程、脚本可直接调。动作类接口只回 `{ok}`，数据统一从 `GET /state` 读
-- **通道二 · Cordis 服务**：客户端半侧在 DSH web 页面内注册，同页客户端插件用 `ctx.get('petApi7340')` 直接取，零网络、零端口；只在该页面实例内有效，方法与返回见 [`CORDIS.md`](CORDIS.md)
-
-相关文件（HTTP 与 Cordis 各一套）：
-
-- [`API.md`](API.md) —— HTTP 接口一览（每个接口一句话，功能预览）
-- [`openapi.yaml`](openapi.yaml) —— 完整契约（OpenAPI 3.1，可直接导入 Swagger UI / Postman）
-- [`CORDIS-API.md`](CORDIS-API.md) —— Cordis 服务一览（每个成员一句话，功能预览）
-- [`CORDIS.md`](CORDIS.md) —— 对外 Cordis 服务（客户端半侧，页面内 `ctx.get('petApi7340')`，不走网络）
-- [`tools/api-tester.html`](tools/api-tester.html) —— HTTP 侧示例：桌宠控制台，扮演第三方消费方，可直观试用（`node tools/api-tester.cjs` 启动）
-- [`tools/cordis-probe`](tools/cordis-probe/README.md) —— Cordis 侧示例：扮演同页客户端插件，用 `ctx.get()` 消费服务
-
-扩展做出来后欢迎分享：统一收录在 [PC2005-cloud/petE](https://github.com/PC2005-cloud/petE)——本项目的扩展收录仓库，每个扩展占一个目录、元信息写在 `plugin.json`，列表由流水线生成。想把自己的加进去，按仓库里的 `CONTRIBUTING.md` 提 PR 即可。安装：`dsh plugin --profile web add "github:PC2005-cloud/petE#path:/<扩展目录>"`。收录不代表对功能或安全性的审核，安装前请自行阅读代码。
-
-## 兼容性
-
-- **操作系统**：Windows / Linux / macOS 三端均可运行——浏览器 overlay 与桌面模式（Electron 透明置顶窗）行为完全一致；Electron 按平台自动探测/下载（`electron.exe` / `Electron.app` / linux 单文件），无需手动安装
-- **无头 / 无桌面环境**：支持 Linux headless 等无图形会话——桌面模式自动检测显示环境（Linux 无 `DISPLAY` / `WAYLAND_DISPLAY` 时判定无显示、跳过桌面窗口，仅日志告警），浏览器 overlay 不受影响
-- **浏览器**：浏览器 overlay 兼容 **Chromium 内核（Chrome / Edge 等）与 Firefox**——透明动画依赖 VP9-Alpha webm，三者均已实测透明确认；**不支持 Safari**（macOS 不认 webm alpha，透明渲染为黑底）——macOS 用 `.mov` 素材（GitHub Release `assets-mov`），下载放入即可（见「②.5 Safari/HEVC 兼容素材」）
-- **多显示器**：支持多屏环境——跨屏漫游/抛掷以各屏工作区为界，异构缩放（各屏 DPI 不同）、任务栏条带、屏幕之间空洞均正确判定（横屏 / 竖屏 / 上下叠放皆可）；设置页「锁定在当前屏幕」可让宠物（抛掷与漫游）只在当前所在那块屏内活动
-
-## 🪟 桌面模式（可选，脱离浏览器）
-
-插件内建**双模式**：安装后默认会拉起**独立透明置顶小窗**——为每只桌面宠物各开一个局部窗口（跟随宠物移动，**不铺满屏幕**），与浏览器 overlay 严格同行为、功能完全对齐：
-
-- **依赖**：首次启动自动探测/下载 Electron（`~/.dsh/electron/`，也可 `cd dsh-pet && npm run ensure:electron` 手动触发）；缺失时仅日志告警，不影响浏览器形态
-- **开关 = 每只宠物的必填字段 `display`**：`web` = 仅浏览器 / `desktop` = 仅桌面 / `both` = 两者 / `none` = 都不显示；桌面模式渲染 display 含 desktop 的**全部**宠物（多开同屏，与浏览器一致），设置页「桌宠配置」编辑即时生效
-- 桌面端数据走独立进程管道，不依赖 DSH 的 HTTP 路由，不受 web 访问闸门影响
-- 本地调试：`cd dsh-pet && npm run start:desktop -- http://127.0.0.1:3080/dsh-pet-7340/config`（无宿主时自动回落 HTTP 路径）
-
-## 🧍 独立运行（完全不打开 DSH）
-
-连 DSH 都不用开：插件的宿主半边跑在伪 ctx 上，由一个本机 HTTP 服务接管路由（**路由表仍是插件那一份**）。
-
-```sh
-npm install -g dsh-pet        # 必须 npm 装；dsh plugin add 装进 profile，bin 不在 PATH 上
-dsh-pet-standalone            # http://127.0.0.1:3080/dsh-pet-7340/（占用则顺延）
-dsh-pet-standalone --check    # 只体检
-dsh-pet-standalone --port 3100
-
-npm run build && npm run standalone   # 仓库里（先构建）
-```
-
-- **能用**：动画链、点击/拖拽/甩抛、右键菜单、多开、自定义动画与表情包、pet pack。
-- **不可用**：余额、碎碎念、对话、系统通知——返回带 `reason` 的结构化失败（见 [`API.md`](API.md)）。
-- **配置**：与 DSH 同一份（`$DSH_HOME/dsh-pet/main-config.jsonc` → 包内默认）。
-- **只显示 `display` 含 `desktop`/`both` 的实例**；端口默认 3080；`Ctrl+C` 或 `POST /shutdown` 退出。
-- **与 DSH 内运行可同时开**，但共用 `%APPDATA%\dsh-pet-electron-helper`，可能互相踩缓存（仅告警）。
-
-## ⚙️ 余额展示（Balance）
-
-按 `eventsRefreshSec.balance`（秒）周期拉取当前服务商的余额/用量数据，每次刷新按档位触发一次余额动画，并在宠物头顶弹出**联想气泡**（随宠物大小等比缩放，10 秒自动消失）：
-
-- **DeepSeek 官方（`deepseek-official`）**：气泡显示账户余额（如 `余额 ¥8.79`）；余额按 ¥20 满额折算成已用百分比，分 6 档播放动画（钱袋满溢 → 金袋叮当 → 钱袋如常 → 数金皱眉 → 袋空如洗 → 分文不剩）
-- **OpenCode Zen Go（`opencode-go`）**：气泡显示 5h/周/月 三个额度窗口中最先告急的一个（如 `周额度已用 88%` / `2.5 天重置`），同样按已用百分比分档
-- **Command Code（`commandcode`，含 GOAT 等套餐）**：气泡显示 5h/周/月 三个额度窗口中最先告急的一个（与 opencode 同一口径：剩余额度最少者，通常先报 5h）；套餐无窗口限制时只报月度窗
-- **暂不支持的服务商**：未登记余额接口的服务商**不播档位动画，改为弹一句文字说明**——第一行「当前服务商暂不支持余额查询」，第二行报出当前 provider id（便于自查）；缺凭证 / 抓取失败同理（原因写在第二行）。自动轮询只在**原因变化**时弹一次（不反复打扰），手动 `/balance` 或桌面右键「查看余额」则每次都会弹
-- **按宠物开关**：`pets[i].balanceEnabled`（必填布尔）控制该宠物是否触发余额动画/显示气泡
-- **所需凭据**：对应 provider 的 API key（`deepseek-official` → `DEEPSEEK_API_KEY`；`opencode-go` → `OPENCODE_GO_API_KEY`；`commandcode` → `COMMANDCODE_API_KEY`），在 DSH 凭据中配置后启用；未匹配的服务商不触发动画，改为弹上面的文字说明气泡
-
-## ⚙️ 碎碎念与对话
-
-- **碎碎念**：`pets[i].whisperEnabled` 开启后，按 `eventsRefreshSec.whisper`（秒，默认 300）周期自动生成一句——每只宠物独立周期、独立文案；触发时随机抽 `events.whisper` 动画 + 头顶说话气泡（10 秒消失）。默认开启
-- **手动触发**：右键菜单「碎碎念」随时来一句——不受 `whisperEnabled` 门控（该字段只关自动周期轮询）
-- **对话**：右键菜单「对话」或 `/chat` 命令打开输入框，与宠物聊天——回复走碎碎念同款展示（说话动画 + 气泡）；记忆持久化在 `$DSH_HOME/dsh-pet/memory.json`，浏览器与桌面共享同一份；多宠物时先用 `/pet` 选择对话目标
-- **带图对话**：输入框下方两枚按钮——上传图片、截取当前屏幕；也可以把图**拖到宠物身上**，或直接 `Ctrl+V` 粘贴截图。图片只跟随这一轮请求，**不进记忆、不进气泡**；原图 ≤640 KiB 且长边 ≤2048 时原样发送，超限会缩到长边 2048 并按质量阶梯压成 JPEG（对应 `POST /chat` 的可选 `attachment`，见 [API.md](API.md)）
-- **打开对话的快捷键**：鼠标停在某只宠物上按 `T`（右键菜单「对话」右侧有同样的提示）。桌面端要求窗口已聚焦——透明窗用 `showInactive` 显示、默认不抢焦点，先点一下宠物即可
-- **截屏的边界**：只在点击/粘贴/拖拽那一瞬抓一帧，随即停流；桌面端取「宠物所在那块屏」，不建长连接、不落盘。图片与用户在 DSH 里贴图走同一个附件存储（内容寻址、同图去重）
-
-## ⚙️ 工作状态联动（Work Status）
-
-`pets[i].workStatusEnabled` 开启后，宠物跟随 DSH 会话活动切「思考 / 工作 / 整理 / 等待 / 成功 / 出错」六档动画 + 头顶气泡：非终态动画循环播、气泡常驻；成功 / 出错播一遍、气泡 10 秒自动收起。
-
-- **档位动画**：`animations.events.workStatus` 数组，索引即档位（勿在中间插入新档，只可追加末尾）
-- **气泡文案**：`workStatusTexts` 每档可配多句随机，任务详情（todo）优先
-- **档位候选数组**：任意档位槽位可写 `string | string[]`——数组 = 档内随机抽 1，循环播放自动轮换、避免连播同一段（余额 / 碎碎念档位同样适用）
-
-## ⚙️ 配置（大小 / 位置 / 多开）
-
-设置页可改大小、位置、边距、显示位置、余额开关、多开与物理参数；配置文件则可以任意自由配置（动画池、播放权重、事件动画、刷新周期……）。
-
-三种配置途径与「pet pack 额外宠物种类」的完整说明见 **[CONFIG.md](CONFIG.md)**。
+---
 
 ## 运行效果
 
-宠物实际运行在 DSH Web 界面中的样子：
+下面八张是宠物在 DSH 网页里的实拍，文件在 `assets/screenshots/`。
 
 <p>
-  <img src="assets/screenshots/dsh-pet-running-1.png" width="380" alt="dsh-pet 运行效果 1" title="dsh-pet 运行效果 1">
-  <img src="assets/screenshots/dsh-pet-running-2.png" width="380" alt="dsh-pet 运行效果 2" title="dsh-pet 运行效果 2">
-  <img src="assets/screenshots/dsh-pet-running-3.png" width="380" alt="dsh-pet 运行效果 3" title="dsh-pet 运行效果 3">
-  <img src="assets/screenshots/dsh-pet-running-4.png" width="380" alt="dsh-pet 运行效果 4" title="dsh-pet 运行效果 4">
-  <img src="assets/screenshots/dsh-pet-running-5.png" width="380" alt="dsh-pet 运行效果 5" title="dsh-pet 运行效果 5">
-  <img src="assets/screenshots/dsh-pet-running-6.png" width="380" alt="dsh-pet 运行效果 6" title="dsh-pet 运行效果 6">
-  <img src="assets/screenshots/dsh-pet-running-7.png" width="380" alt="dsh-pet 运行效果 7" title="dsh-pet 运行效果 7">
-  <img src="assets/screenshots/dsh-pet-running-8.png" width="380" alt="dsh-pet 运行效果 8" title="dsh-pet 运行效果 8">
+  <img src="assets/screenshots/dsh-pet-running-1.png" width="380" alt="dsh-pet 在界面中的运行效果 1">
+  <img src="assets/screenshots/dsh-pet-running-2.png" width="380" alt="dsh-pet 在界面中的运行效果 2">
+  <img src="assets/screenshots/dsh-pet-running-3.png" width="380" alt="dsh-pet 在界面中的运行效果 3">
+  <img src="assets/screenshots/dsh-pet-running-4.png" width="380" alt="dsh-pet 在界面中的运行效果 4">
+  <img src="assets/screenshots/dsh-pet-running-5.png" width="380" alt="dsh-pet 在界面中的运行效果 5">
+  <img src="assets/screenshots/dsh-pet-running-6.png" width="380" alt="dsh-pet 在界面中的运行效果 6">
+  <img src="assets/screenshots/dsh-pet-running-7.png" width="380" alt="dsh-pet 在界面中的运行效果 7">
+  <img src="assets/screenshots/dsh-pet-running-8.png" width="380" alt="dsh-pet 在界面中的运行效果 8">
 </p>
 
-## 效果预览
+透明动画的 GIF 预览在 `dsh-pet/assets/preview/`（文件名是拼音），播放用的 VP9-Alpha 视频在 `dsh-pet/assets/webm/`。GIF 里的透明区域会显示成页面底色，实际播放是透明的。分类预览见文末。
 
-全部动画（640×360，插件实际播放用的资源）——GIF 预览存放于仓库 `dsh-pet/assets/preview/`（raw 直链渲染，文件名采用拼音便于跨平台）；完整透明视频见插件包 `dsh-pet/assets/webm/`（VP9-alpha，唯一发布格式）：
+---
 
-**待机 / 转向**
+## 系统要求
+
+本说明按 **macOS** 来写启动步骤。同一套代码也有 Windows（`electron.exe`）和 Linux（单文件 `electron`）分支；Linux 没有 `DISPLAY` / `WAYLAND_DISPLAY` 时会跳过桌面小窗，只打日志。macOS 不看这两个变量，有图形会话就可以拉窗。
+
+| 项目 | 要求 |
+| --- | --- |
+| 系统 | macOS，能打开普通图形窗口。Intel 与 Apple 芯片都可以，Electron 按 `process.arch` 下载对应包。 |
+| Node.js | `>= 22.12.0`（`dsh-pet/package.json` 的 `engines`）。发版流水线用 Node 24。 |
+| 包管理器 | pnpm。锁文件是 `dsh-pet/pnpm-lock.yaml`。本机用 pnpm 10 可以按锁安装；GitHub Actions 发版用 pnpm 12。没有 pnpm 时再用 npm。 |
+| 磁盘 | 仓库自带 webm 与 GIF。第一次启动另下一份 Electron 43.3.0（约一百兆这一档，视架构而定）到 `$DSH_HOME/electron`。 |
+| 网络 | 首次需要能访问 Electron 镜像。默认 `https://npmmirror.com/mirrors/electron/`。 |
+| 浏览器浮层 | 桌面小窗走 Electron（Chromium），macOS 上直接播包内 `.webm`。Safari / WKWebView 不认 webm 的 alpha，会变成黑底；那只影响「用 Safari 打开 DSH 网页浮层」。要在 Safari 里透明，需另备 HEVC `.mov`，见 [MAKE-YOUR-OWN-PET.md](MAKE-YOUR-OWN-PET.md)。 |
+| 签名 | 自动下载的 Electron 没有苹果签名。第一次打开若被系统拦住，见下面的常见问题，不要换一条别人机器上的绝对路径来绕。 |
+
+不需要预先安装 DSH，也不需要把某台电脑的桌面路径写进配置。数据目录只有一个规则：`$DSH_HOME`，没设置时就是用户主目录下的 `.dsh`。macOS 上即 `~/.dsh`。
+
+---
+
+## 安装与启动
+
+在终端里做。路径按你克隆的位置来，不要写死某个人的主目录。
+
+### 1. 确认 Node
+
+```sh
+node -v
+```
+
+需要 v22.12 或更高。macOS 上可以用官网安装包或 nvm。版本不够就不要继续，`@electron/get` 的引擎声明卡在这一档。
+
+### 2. 克隆本仓库
+
+```sh
+git clone https://github.com/Tomhao10225101490/dsh-pet-patched.git
+cd dsh-pet-patched/dsh-pet
+```
+
+不要克隆上游再指望得到这里的补丁。npm 上的 `dsh-pet` 也是上游包，`npm install -g dsh-pet` 不会装到本仓库。
+
+### 3. 安装依赖
+
+```sh
+pnpm install --frozen-lockfile
+```
+
+没有 pnpm 时：
+
+```sh
+npm install
+```
+
+这一步只装 `zod`、`openai`、`@anthropic-ai/sdk`、`@electron/get` 等运行依赖。**不要**接着跑 `pnpm build` 或 `npm run build`。
+
+### 4. 体检
+
+```sh
+node lib/standalone.js --check
+```
+
+等价写法：`pnpm run standalone -- --check`。
+
+正常时退出码为 0，并打印类似下面的行（路径会换成你的机器）：
+
+```text
+插件            dsh-pet@0.3.8  <你的克隆目录>/dsh-pet
+DSH_HOME        ~/.dsh
+用户配置        ~/.dsh/dsh-pet/main-config.jsonc（不存在 → 用包内默认）
+内置默认配置    <克隆目录>/dsh-pet/assets/config.jsonc
+Electron        未发现（首次运行会下载到 ~/.dsh/electron）
+配置条目        1 个：main
+  条目 main：宠物 1 只  main(size=462, display=both)
+桌面小窗        1 只
+结论：配置与 Electron 就绪，可以直接启动（npm run standalone）。
+```
+
+怎么读这张报告：
+
+- 第一行若出现 `「main-config.jsonc」的 pets 缺失或为空，已取默认宠物列表`，表示你还没有用户配置，程序改用包内 `assets/config.jsonc`。这是第一次运行的正常情况。
+- `Electron 未发现` 只说明还没下载。最后那句「Electron 就绪」是固定文案，**不代表磁盘上已经有 Electron**。看上面那一行。
+- `桌面小窗 0 只` 才是问题：`display` 必须是 `desktop` 或 `both`。包内默认是 `both`，所以第一次应为 1 只。
+- 退出码非 0：多半是包内 `assets/config.jsonc` 读不到。确认当前目录是 `dsh-pet/`，并且跑的是 `lib/standalone.js`，不是直接跑 `src/`。
+
+### 5. 启动
+
+```sh
+node lib/standalone.js
+```
+
+指定端口（默认 3080，被占用则向后最多试 25 个）：
+
+```sh
+node lib/standalone.js --port 3100
+```
+
+启动后终端会写下这些事实：
+
+- 本机路由：`http://127.0.0.1:<端口>/dsh-pet-7340/`
+- 实际用的配置文件
+- 有几只宠物、几只会开桌面小窗
+- AI 是否已经在本机设置里启用
+- 那行过时的「余额不可用」（见上面的差异表，不要被它吓退）
+
+第一次启动会下载 Electron 43.3.0 并解压到 `$DSH_HOME/electron`。macOS 上可执行文件是：
+
+```text
+~/.dsh/electron/Electron.app/Contents/MacOS/Electron
+```
+
+若你设置了 `DSH_HOME`，把 `~/.dsh` 换成那个目录。下载过程打在终端里。下载失败只影响桌面小窗；把镜像或版本改掉再启动即可，见环境变量一节。
+
+窗口起来之后：宠物默认在屏幕右上角附近（`corner: top-right`，边距 24 / 100，宽度 462，高度按 16:9）。macOS 菜单栏里有托盘图标（`trayEnabled` 默认 true），Dock 里不放图标。左键点托盘弹出菜单。
+
+退出：终端里 Ctrl+C，或托盘菜单里的退出，或对本机服务 `POST /shutdown`。
+
+### 6. 打开 AI 设置并保存密钥
+
+右键宠物，第一项是「打开 AI 设置」。它打开的是这次进程自己的本机页面（`/standalone-ai/`，地址里带一次性令牌），不是某个写死的桌面文件夹。
+
+在页面里填写：
+
+| 字段 | 约束 | 说明 |
+| --- | --- | --- |
+| protocol | `openai-compatible` 或 `anthropic` | DeepSeek 官方用前者 |
+| baseUrl | 最长 2048，只能是 http/https，不能带账号、查询串或片段 | 要查余额的话，字符串里必须包含 `api.deepseek.com`，例如 `https://api.deepseek.com` |
+| model | 最长 200 | 原样传给服务商，例如 `deepseek-chat` |
+| apiKey | 最长 4096，不能有空白 | 只写进本机 `standalone-ai.json`，权限收成仅当前用户可读（非 Windows 是 `0600`）。页面回读时只告诉你有没有密钥，不把密钥显示回来 |
+| enabled | 布尔 | 打开之后才发模型请求。打开时地址、模型和密钥必须齐全 |
+| automaticWhispers | 布尔 | 自动碎碎念。默认关 |
+| whisperIntervalSec | 60–86400 的整数 | 默认 300 |
+| maxTokens | 128–4096 的整数 | 默认 1024。想要补丁所说的长对话，设为 4096 |
+| timeoutMs | 1000–60000 的整数 | 默认 30000 |
+
+保存之后文件在：
+
+```text
+$DSH_HOME/dsh-pet/standalone-ai.json
+```
+
+不要把这个文件、`standalone-runtime.json`（里面有本次运行的令牌）、`memory.json`、`logs.txt` 复制进仓库。`.gitignore` 已经按文件名忽略它们。文档和截图里也不要贴真实密钥。
+
+查余额：右键「查看余额」。成功时头顶出现常驻小标签，数字是上一节说的显示换算，不是账户里的原始金额。没配密钥、或 `baseUrl` 不是 DeepSeek 官方时，气泡里会写原因，而不是静默。
+
+自动刷新间隔是配置里的 `eventsRefreshSec.balance`，包内默认 1800 秒。手动「查看余额」不受 `balanceEnabled` 开关限制。
+
+---
+
+## 配置
+
+有三层，写错的字段会告警并回落，不会静默用残缺配置：
+
+| 层 | 位置 | 谁改 |
+| --- | --- | --- |
+| 包内默认 | `dsh-pet/assets/config.jsonc` | 不要为了自己的机器改这个文件并提交 |
+| 用户配置 | `$DSH_HOME/dsh-pet/main-config.jsonc` | 设置页保存，或自己编辑。整体替换你写到的顶层字段 |
+| 额外种类 | `$DSH_HOME/dsh-pet/pet/<名>-config.json` 与同名 `-animation/` | pet pack |
+
+`$DSH_HOME` 默认是 `~/.dsh`。独立模式和 DSH 插件读的是同一套路径（`src/standalone/options.ts` 的 `configPathsFor` 跟宿主对齐）。
+
+常用字段：
+
+- `pets[]`：`id`、`name`、`size`（宽度 px，高度 = 宽 × 9/16）、`display`（`web` / `desktop` / `both` / `none`）、`position.corner` 与 `marginX` / `marginY`、`balanceEnabled`、`whisperEnabled`、`workStatusEnabled`、`fixedEnabled`。
+- `eventsRefreshSec.balance` / `.whisper`：秒。余额默认 1800，碎碎念默认 300。
+- `chatMemoryRounds`：每次对话带上的历史轮数。包内默认 5。`memory.json` 仍全量保存。
+- `whisperImageEnabled` / `chatImageEnabled`：表情包。包内默认都是 true。
+- `physics`：重力、弹性、摩擦、顶部反弹、甩抛力度、宠物互撞。
+- `font`：`candy`（包内软糖体）等预设 id，加字号、是否跟着宠物缩放。
+- `trayEnabled`：桌面托盘。macOS 上是菜单栏图标。
+- `confineToScreen`：多屏时是否锁在当前屏。
+- `clickSoundEnabled`：点击音效，包内默认 false。
+
+独立模式只显示 `display` 含 `desktop` 或 `both` 的宠物。没有 DSH 网页，所以 `web` 那一半不会出现；`both` 仍然会开桌面小窗。
+
+字段的完整合并规则、pet pack 目录形状，见 [CONFIG.md](CONFIG.md)。包内 `config.jsonc` 自己的注释也是契约的一部分，改配置前先读文件头那三段「字段归属」。
+
+想用补丁作者常用的那组用户层选项（宽度 320、关掉配图、记忆 5 轮、只放桌面），复制 [docs/example-user-config.jsonc](docs/example-user-config.jsonc) 到 `$DSH_HOME/dsh-pet/main-config.jsonc` 再改。那不是程序默认值。`pets` 写了就是整表替换，示例里因而带上了必填开关。
+
+改完用户配置后，桌面端右键「重载配置」，或重启 `node lib/standalone.js`。
+
+---
+
+## 环境变量
+
+只列运行时真正会读的。没列出的不要自己发明。
+
+| 变量 | 默认 | 作用 |
+| --- | --- | --- |
+| `DSH_HOME` | `~/.dsh` | 用户数据与 Electron 解压目录的根 |
+| `DSH_PET_ELECTRON_PATH` | 空 | 直接指向 Electron 可执行文件。macOS 上应指向 `Electron.app/Contents/MacOS/Electron`，不是 `.app` 包本身 |
+| `DSH_PET_ELECTRON_VERSION` | `43.3.0` | 缺失时下载的版本 |
+| `DSH_PET_ELECTRON_MIRROR` | `https://npmmirror.com/mirrors/electron/` | 下载镜像 |
+| `DSH_PET_DESKTOP_FORCE` | 未设 | 设为 `1` 时，Linux 上即使没有 `DISPLAY` 也尝试开窗。macOS 不需要 |
+| `DSH_PET_STANDALONE_DEBUG` | 未设 | 设为 `1` 时独立模式打 DEBUG 日志 |
+| `DSH_PET_CONFIG_URL` | `http://127.0.0.1:3080/dsh-pet-7340/config` | 只给手动启动桌面 Helper 的开发脚本用（`pnpm run start:desktop`） |
+| `DSH_PET_SCALE` | `1` | 同上，开发脚本塞给 Helper 的缩放 |
+| `ELECTRON_RUN_AS_NODE` | — | 启动脚本会删掉它。设着的话 Electron 会当成纯 Node，`require('electron')` 直接失败 |
+
+`DSH_PET_BRIDGE` 由宿主在拉起 Helper 时设为 `1`。不要为了「接上某台机器」自己 export 一个路径。桥只是同一台电脑上两个进程之间的行协议：渲染进程把 `/dsh-pet-7340/...` 请求写成一行 JSON，宿主回答；视频文件回的是绝对路径，由 Electron 自己读盘，不把二进制塞进管道。
+
+---
+
+## 装进 DeepSeek Harness
+
+本检出**不能**直接 `dsh plugin add file:./dsh-pet` 当完整插件用。
+
+`package.json` 的 `main` 是 `lib/index.js`，`cordis.patch.yml` 也写明宿主入口是这个文件。当前 `dsh-pet/lib/` 里只有两份已打补丁的产物：
+
+- `client.js`：浏览器浮层
+- `standalone.js`：独立模式入口，也是 `bin.dsh-pet-standalone`
+
+没有 `lib/index.js`（DSH 宿主半侧），也没有 `lib/app.js`（`src/app/main.ts` 那个单进程应用的构建结果）。`pnpm run start:app` 和 `pnpm dist` 因此也还不能在「不构建」的前提下使用。`scripts/dist.mjs` 目前只打 Windows 解包目录。
+
+`pnpm run build` 会生成缺失的入口，同时用未打补丁的 `src/` 覆盖 `lib/client.js`、`lib/standalone.js` 和 `runtime/electron-helper/shared-core.js`。补丁还没移植回 `src/` 之前，不要为了装进 DSH 去构建，除非你准备好丢掉本仓库的余额、标签、双击和长对话改动。
+
+若你已经在用上游 npm 包 `dsh-pet` 作为 DSH 插件，那是另一份代码，不包含本仓库的补丁。
+
+DSH 兼容声明（给将来移植进 `src/` 之后用）：`0.2.0-rc.1`、`0.2.0-rc.2`、`0.2.1-rc.2` 标为 compatible，`0.1.7-rc.2` 为 incompatible。上游 README 写明开发时对着 `0.2.1-rc.2` 测过。
+
+---
+
+## 常见问题
+
+**桌面上没有宠物。**  
+先看 `--check` 的「桌面小窗」是不是 0。确认 `display` 是 `desktop` 或 `both`。再看终端有没有 Electron 下载失败。macOS 上若系统拦住了未签名的 `Electron.app`，到「隐私与安全性」里允许打开，或在终端对**你自己的** Electron 目录去掉隔离属性（目录跟 `DSH_HOME` 走，不要抄别人的家目录）：
+
+```sh
+xattr -dr com.apple.quarantine "${DSH_HOME:-$HOME/.dsh}/electron"
+```
+
+然后重新 `node lib/standalone.js`。
+
+**余额数字大得不像话，前面却是 ¥。**  
+这是补丁的显示换算（USD×1325、CNY×187，取整，符号仍是 ¥）。接口返回的金额没有被改写。不想要这层换算，需要改 `moneyRows` 里的 `toKRW` 并接受那是在改已打补丁的产物；见 [PATCHES.md](PATCHES.md) 第 3 节。
+
+**右键查看余额只弹出说明，没有数字。**  
+打开 AI 设置，确认已保存密钥、`enabled` 为真，且 `baseUrl` 含 `api.deepseek.com`。密钥文件损坏或为空时，错误文案是「独立模式未配置 DeepSeek 密钥」。启动横幅那行「余额不可用」可以忽略。
+
+**对话只有一句。**  
+碎碎念仍限制在大约 20 字。对话要长回复时，把 AI 设置里的单次输出上限调到 4096，并确认走的是补丁后的 `lib/standalone.js`（没有被重新构建盖掉）。
+
+**双击先跳了两下才出对话框。**  
+单击动画会先收到那两下 `click`，然后才是 `dblclick`。对话已经开着时再双击不会再开一个，也不会把它关掉。
+
+**Command + 双击没有打开对话。**  
+这是呼出 DSH 的快捷键（Windows / Linux 上是 Ctrl + 点击）。普通双击才打开对话。
+
+**`npm run build` 之后余额标签或独立余额没了。**  
+构建用 `src/` 覆盖了补丁产物。用 git 把 `lib/client.js`、`lib/standalone.js`、`runtime/electron-helper/shared-core.js` 恢复回来。不要把重新构建的未打补丁文件提交上来。
+
+**Safari 里宠物是黑底。**  
+桌面小窗不受影响。Safari 需要 HEVC-with-Alpha 的 `.mov`。仓库有 `.github/workflows/hevc-alpha.yml` 和 `scripts/encode_hevc_alpha.sh`（macOS AVFoundation）。步骤见 [MAKE-YOUR-OWN-PET.md](MAKE-YOUR-OWN-PET.md)。
+
+**端口被占用。**  
+默认从 3080 向后找空端口，最多 25 次。也可以 `--port` 指定。不要和另一个正在跑的桌宠抢同一个用户数据目录：两边会共用 `$DSH_HOME` 下的 Electron 缓存目录，上游原话是可能互相踩缓存，程序只告警。
+
+**日志在哪。**  
+`$DSH_HOME/dsh-pet/logs.txt`。独立模式没有自己的控制台窗口时也写这里。
+
+---
+
+## 项目结构
+
+```
+├── README.md  PATCHES.md  FORK-NOTES.md  CONFIG.md  API.md  CORDIS.md
+├── CONTRIBUTING.md  CHANGELOG.md
+├── docs/                  架构、开发说明、可选的用户配置示例
+├── patches/               补丁参考 diff（01–06，不能直接 git apply）
+├── prompts/               动画与通知图标的提示词
+├── scripts/               素材链（去水印、抠像、归一化、GIF、HEVC）。不是桌宠启动脚本
+├── video/                 素材链用的水印遮罩
+├── tools/                 API 调试页、Cordis 探针、DPI 探针
+├── assets/screenshots/    运行截图
+└── dsh-pet/
+    ├── src/host/          DSH 宿主半侧：配置、路由、余额、会话、拉起桌面进程
+    ├── src/client/        浏览器浮层，构建后才是 lib/client.js
+    ├── src/shared/        两端共用的纯逻辑（物理、菜单、余额展示、状态）
+    ├── src/standalone/    独立模式 CLI、本机 AI 设置、回环 HTTP
+    ├── src/app/           单进程 Electron 应用的源码（本检出没有对应的 lib/app.js）
+    ├── lib/               已提交：client.js、standalone.js（含补丁）。没有 index.js
+    ├── runtime/electron-helper/   透明窗口。含已打补丁的 sprite / events / shared-core
+    ├── assets/            webm、preview GIF、字体、表情包、config.jsonc
+    └── scripts/           构建、下载 Electron、测试注册
+```
+
+模块怎么串起来，见 [docs/architecture.md](docs/architecture.md)。测试命令和「为什么不能先构建」，见 [docs/development.md](docs/development.md)。
+
+---
+
+## 许可
+
+必须分开看，不能把整个仓库当成 MIT：
+
+- **代码**：MIT。[LICENSE](LICENSE) 的版权人是 PC2005-cloud（2026）。
+- **素材**（`dsh-pet/assets` 里的动画、`prompts/`、`video/` 及由其生成的预览）：允许开源使用，禁止商用。
+- **形象**：社区二创，CC BY-NC-SA 4.0。原型「溟月」为 B 站 [@上善无形](https://space.bilibili.com/4456176)；DeepSeek 女仆鲸鱼版为 B 站 [@ZipZipPipe](https://space.bilibili.com/4168597)。[声明原文](https://www.bilibili.com/opus/1247156596114456581)。不可以商业化。
+- **二次公开分发**：保留上述归属、非商业限制，以及上游仓库地址 https://github.com/PC2005-cloud/dsh-pet 。本仓库是衍生作品，公开页面同时保留本仓库地址即可。
+
+---
+
+## 贡献
+
+见 [CONTRIBUTING.md](CONTRIBUTING.md)。短版本：先开 issue 说你要改的行为；不要提交密钥和用户配置；不要用一次无说明的 `npm run build` 覆盖 `lib/`。问题请报到本仓库的 [Issues](https://github.com/Tomhao10225101490/dsh-pet-patched/issues)。与补丁无关、属于上游产品的功能请求，请去上游仓库。
+
+---
+
+## 动画预览
+
+每一类放几张代表。全部 GIF 在 `dsh-pet/assets/preview/`，全部透明视频在 `dsh-pet/assets/webm/`。
+
+**待机 / 转向 / 移动**
 
 <p>
-  <img src="dsh-pet/assets/preview/daiji-huxi-xiuxian.gif" width="160" alt="待机呼吸休闲" title="待机呼吸休闲">
-  <img src="dsh-pet/assets/preview/dongzhangxiwang.gif" width="160" alt="东张西望" title="东张西望">
-</p>
-
-**移动**
-
-<p>
-  <img src="dsh-pet/assets/preview/pangxie-zoulu.gif" width="160" alt="螃蟹走路" title="螃蟹走路">
-  <img src="dsh-pet/assets/preview/yuandi-piaofu-tabu.gif" width="160" alt="原地漂浮踏步" title="原地漂浮踏步">
-  <img src="dsh-pet/assets/preview/yuandi-zuozhuan-benpao.gif" width="160" alt="原地左转奔跑" title="原地左转奔跑">
+  <img src="dsh-pet/assets/preview/daiji-huxi-xiuxian.gif" width="160" alt="待机呼吸休闲">
+  <img src="dsh-pet/assets/preview/dongzhangxiwang.gif" width="160" alt="东张西望">
+  <img src="dsh-pet/assets/preview/pangxie-zoulu.gif" width="160" alt="螃蟹走路">
+  <img src="dsh-pet/assets/preview/yuandi-piaofu-tabu.gif" width="160" alt="原地漂浮踏步">
+  <img src="dsh-pet/assets/preview/yuandi-zuozhuan-benpao.gif" width="160" alt="原地左转奔跑">
 </p>
 
 **小动作**
 
 <p>
-  <img src="dsh-pet/assets/preview/youxian-hengga.gif" width="160" alt="悠闲哼歌" title="悠闲哼歌">
-  <img src="dsh-pet/assets/preview/chaoda-shenlanyao.gif" width="160" alt="超大伸懒腰" title="超大伸懒腰">
-  <img src="dsh-pet/assets/preview/yuandi-qiaoji-zhuomian-hudong.gif" width="160" alt="原地敲击桌面互动" title="原地敲击桌面互动">
-  <img src="dsh-pet/assets/preview/yuandi-zhongli-xiadun-yasuo.gif" width="160" alt="原地重力下蹲压缩" title="原地重力下蹲压缩">
-  <img src="dsh-pet/assets/preview/haqian-liantian.gif" width="160" alt="哈欠连天" title="哈欠连天">
-  <img src="dsh-pet/assets/preview/yuandi-xiaoqi-chenmian.gif" width="160" alt="原地小憩沉眠" title="原地小憩沉眠">
-  <img src="dsh-pet/assets/preview/nvpu-quxi-liyi.gif" width="160" alt="女仆屈膝礼仪" title="女仆屈膝礼仪">
-  <img src="dsh-pet/assets/preview/beixiayitiao-zhamao.gif" width="160" alt="被吓一跳" title="被吓一跳">
-  <img src="dsh-pet/assets/preview/xiaofudu-yuandi-360du-xuanzhuan-zhanshi.gif" width="160" alt="小幅度原地360度旋转展示" title="小幅度原地360度旋转展示">
-  <img src="dsh-pet/assets/preview/touchi-lingshi-bei-zhuazhu.gif" width="160" alt="偷吃零食被抓住" title="偷吃零食被抓住">
-  <img src="dsh-pet/assets/preview/yong-jingyu-weiba-paidadi.gif" width="160" alt="用鲸鱼尾巴拍打地面" title="用鲸鱼尾巴拍打地面">
-  <img src="dsh-pet/assets/preview/da-keshui-bei-jingxing.gif" width="160" alt="打瞌睡被惊醒" title="打瞌睡被惊醒">
-  <img src="dsh-pet/assets/preview/zhao-jingzi.gif" width="160" alt="照镜子" title="照镜子">
-  <img src="dsh-pet/assets/preview/zhengti-huanzhuang-shise.gif" width="160" alt="整体换装试色" title="整体换装试色">
-  <img src="dsh-pet/assets/preview/qingkuai-jilu.gif" width="160" alt="轻快记录" title="轻快记录">
-  <img src="dsh-pet/assets/preview/xie-daima.gif" width="160" alt="写代码" title="写代码">
-  <img src="dsh-pet/assets/preview/yaoshan-naliang.gif" width="160" alt="摇扇纳凉" title="摇扇纳凉">
-  <img src="dsh-pet/assets/preview/chenjian-shuaya.gif" width="160" alt="晨间刷牙" title="晨间刷牙">
+  <img src="dsh-pet/assets/preview/youxian-hengga.gif" width="160" alt="悠闲哼歌">
+  <img src="dsh-pet/assets/preview/chaoda-shenlanyao.gif" width="160" alt="超大伸懒腰">
+  <img src="dsh-pet/assets/preview/xie-daima.gif" width="160" alt="写代码">
+  <img src="dsh-pet/assets/preview/nvpu-quxi-liyi.gif" width="160" alt="女仆屈膝礼仪">
+  <img src="dsh-pet/assets/preview/da-keshui-bei-jingxing.gif" width="160" alt="打瞌睡被惊醒">
 </p>
 
 **玩耍**
 
 <p>
-  <img src="dsh-pet/assets/preview/yuandi-zhuanxin-wan-mofang.gif" width="160" alt="原地专心玩魔方" title="原地专心玩魔方">
-  <img src="dsh-pet/assets/preview/yuandi-dunxia-wan-wanju-qiche.gif" width="160" alt="原地蹲下玩玩具汽车" title="原地蹲下玩玩具汽车">
-  <img src="dsh-pet/assets/preview/jingyu-tu-paopao-texiao.gif" width="160" alt="鲸鱼吐泡泡特效" title="鲸鱼吐泡泡特效">
-  <img src="dsh-pet/assets/preview/yuandi-tiaoyue-zhuasui-touding-wupin.gif" width="160" alt="原地跳跃抓碎头顶物品" title="原地跳跃抓碎头顶物品">
-  <img src="dsh-pet/assets/preview/wan-youxi-qijibaituai.gif" width="160" alt="玩游戏气急败坏" title="玩游戏气急败坏">
-  <img src="dsh-pet/assets/preview/wan-shuiqiang.gif" width="160" alt="玩水枪" title="玩水枪">
-  <img src="dsh-pet/assets/preview/xiaotiqin-yanzou.gif" width="160" alt="小提琴演奏" title="小提琴演奏">
-  <img src="dsh-pet/assets/preview/lanjing-xianshi.gif" width="160" alt="蓝鲸现世" title="蓝鲸现世">
-  <img src="dsh-pet/assets/preview/youya-nvpuwu.gif" width="160" alt="优雅女仆舞" title="优雅女仆舞">
-  <img src="dsh-pet/assets/preview/qingkuai-yaobaiwu.gif" width="160" alt="轻快摇摆舞" title="轻快摇摆舞">
-  <img src="dsh-pet/assets/preview/keai-zhaiwu.gif" width="160" alt="可爱宅舞" title="可爱宅舞">
-  <img src="dsh-pet/assets/preview/chui-qiqiu.gif" width="160" alt="吹气球" title="吹气球">
-  <img src="dsh-pet/assets/preview/dongwu-huanrao.gif" width="160" alt="动物环绕" title="动物环绕">
-  <img src="dsh-pet/assets/preview/fang-fengzheng.gif" width="160" alt="放风筝" title="放风筝">
-  <img src="dsh-pet/assets/preview/chai-liwu.gif" width="160" alt="拆礼物" title="拆礼物">
-  <img src="dsh-pet/assets/preview/bian-gezi.gif" width="160" alt="变鸽子" title="变鸽子">
-  <img src="dsh-pet/assets/preview/puke-moshu.gif" width="160" alt="扑克魔术" title="扑克魔术">
-  <img src="dsh-pet/assets/preview/chou-tuoluo.gif" width="160" alt="抽陀螺" title="抽陀螺">
-  <img src="dsh-pet/assets/preview/chui-dizi.gif" width="160" alt="吹笛子" title="吹笛子">
-  <img src="dsh-pet/assets/preview/hudie-mifeng-huanrao-touding-kaihua.gif" width="160" alt="蝴蝶蜜蜂环绕头顶开花" title="蝴蝶蜜蜂环绕头顶开花">
-  <img src="dsh-pet/assets/preview/lu-mao.gif" width="160" alt="撸猫" title="撸猫">
-  <img src="dsh-pet/assets/preview/pingkong-shenghua.gif" width="160" alt="凭空生花" title="凭空生花">
-  <img src="dsh-pet/assets/preview/qi-muma.gif" width="160" alt="骑木马" title="骑木马">
-  <img src="dsh-pet/assets/preview/sanqiu-paojie.gif" width="160" alt="三球抛接" title="三球抛接">
-  <img src="dsh-pet/assets/preview/ti-jianzi.gif" width="160" alt="踢毽子" title="踢毽子">
-  <img src="dsh-pet/assets/preview/xiawuziqi.gif" width="160" alt="下五子棋" title="下五子棋">
-  <img src="dsh-pet/assets/preview/dangqiuqian.gif" width="160" alt="荡秋千" title="荡秋千">
+  <img src="dsh-pet/assets/preview/yuandi-zhuanxin-wan-mofang.gif" width="160" alt="原地专心玩魔方">
+  <img src="dsh-pet/assets/preview/shuan-huoguo.gif" width="160" alt="涮火锅">
+  <img src="dsh-pet/assets/preview/youya-nvpuwu.gif" width="160" alt="优雅女仆舞">
+  <img src="dsh-pet/assets/preview/sanqiu-paojie.gif" width="160" alt="三球抛接">
+  <img src="dsh-pet/assets/preview/pingkong-shenghua.gif" width="160" alt="凭空生花">
 </p>
 
-**吃什么**
+**点击 / 拖拽**
 
 <p>
-  <img src="dsh-pet/assets/preview/chi-baifan.gif" width="160" alt="吃白饭" title="吃白饭">
-  <img src="dsh-pet/assets/preview/dakou-chi-lingshi.gif" width="160" alt="大口吃零食" title="大口吃零食">
-  <img src="dsh-pet/assets/preview/chi-token.gif" width="160" alt="吃Token" title="吃Token">
-  <img src="dsh-pet/assets/preview/chi-zaocan.gif" width="160" alt="吃早餐" title="吃早餐">
-  <img src="dsh-pet/assets/preview/chi-wucan.gif" width="160" alt="吃午餐" title="吃午餐">
-  <img src="dsh-pet/assets/preview/chi-wancan.gif" width="160" alt="吃晚餐" title="吃晚餐">
-  <img src="dsh-pet/assets/preview/chi-bingqilin-ronghua.gif" width="160" alt="吃冰淇淋融化" title="吃冰淇淋融化">
-  <img src="dsh-pet/assets/preview/chi-dazhaxie.gif" width="160" alt="吃大闸蟹" title="吃大闸蟹">
-  <img src="dsh-pet/assets/preview/chi-tanghulu.gif" width="160" alt="吃糖葫芦" title="吃糖葫芦">
-  <img src="dsh-pet/assets/preview/chi-changshoumian.gif" width="160" alt="吃长寿面" title="吃长寿面">
-  <img src="dsh-pet/assets/preview/chi-xigua.gif" width="160" alt="吃西瓜" title="吃西瓜">
-  <img src="dsh-pet/assets/preview/shuan-huoguo.gif" width="160" alt="涮火锅" title="涮火锅">
+  <img src="dsh-pet/assets/preview/dianji-huiying-kaixin-yuedong.gif" width="160" alt="点击回应-开心跃动">
+  <img src="dsh-pet/assets/preview/dianji-huiying-haixiu-jingya.gif" width="160" alt="点击回应-害羞惊讶">
+  <img src="dsh-pet/assets/preview/beishubiao-tuozhuai-xuankong-fankui.gif" width="160" alt="被鼠标拖拽悬空反馈">
 </p>
 
-**时节**
+**余额六档**（显示标签是本仓库补丁；动画本身来自上游）
 
 <p>
-  <img src="dsh-pet/assets/preview/beiluoye-yanmo.gif" width="160" alt="被落叶淹没" title="被落叶淹没">
-  <img src="dsh-pet/assets/preview/zhongqiu-shangyue-chi-yuebing.gif" width="160" alt="中秋赏月吃月饼" title="中秋赏月吃月饼">
-  <img src="dsh-pet/assets/preview/duixueren.gif" width="160" alt="堆雪人" title="堆雪人">
-  <img src="dsh-pet/assets/preview/fang-yanhua.gif" width="160" alt="放烟花" title="放烟花">
-  <img src="dsh-pet/assets/preview/chi-zongzi.gif" width="160" alt="吃粽子" title="吃粽子">
-  <img src="dsh-pet/assets/preview/chi-niangao.gif" width="160" alt="吃年糕" title="吃年糕">
-  <img src="dsh-pet/assets/preview/chi-qingtuan.gif" width="160" alt="吃青团" title="吃青团">
-  <img src="dsh-pet/assets/preview/chi-labazhou.gif" width="160" alt="吃腊八粥" title="吃腊八粥">
-  <img src="dsh-pet/assets/preview/chi-chongyanggao.gif" width="160" alt="吃重阳糕" title="吃重阳糕">
-  <img src="dsh-pet/assets/preview/shou-hongbao.gif" width="160" alt="收红包" title="收红包">
-  <img src="dsh-pet/assets/preview/xie-fuzi.gif" width="160" alt="写福字" title="写福字">
-  <img src="dsh-pet/assets/preview/chuanzhenqiqiao.gif" width="160" alt="穿针乞巧" title="穿针乞巧">
-  <img src="dsh-pet/assets/preview/wu-shitou.gif" width="160" alt="舞狮头" title="舞狮头">
-  <img src="dsh-pet/assets/preview/taotang-nanguadeng.gif" width="160" alt="讨糖南瓜灯" title="讨糖南瓜灯">
-  <img src="dsh-pet/assets/preview/cha-zhuyu-shangju.gif" width="160" alt="插茱萸赏菊" title="插茱萸赏菊">
-  <img src="dsh-pet/assets/preview/fanghedeng.gif" width="160" alt="放河灯" title="放河灯">
-  <img src="dsh-pet/assets/preview/menghua-xiaoyouling.gif" width="160" alt="萌化小幽灵" title="萌化小幽灵">
-  <img src="dsh-pet/assets/preview/zhuangdian-shengdanshu.gif" width="160" alt="装点圣诞树" title="装点圣诞树">
-  <img src="dsh-pet/assets/preview/fang-kongmingdeng.gif" width="160" alt="放孔明灯" title="放孔明灯">
-  <img src="dsh-pet/assets/preview/chitangyuan.gif" width="160" alt="吃汤圆" title="吃汤圆">
-  <img src="dsh-pet/assets/preview/chijiaozi.gif" width="160" alt="吃饺子" title="吃饺子">
+  <img src="dsh-pet/assets/preview/qian-dai-man-yi.gif" width="160" alt="余额-钱袋满溢">
+  <img src="dsh-pet/assets/preview/jin-dai-ding-dang.gif" width="160" alt="余额-金袋叮当">
+  <img src="dsh-pet/assets/preview/qian-dai-ru-chang.gif" width="160" alt="余额-钱袋如常">
+  <img src="dsh-pet/assets/preview/shu-jin-zhou-mei.gif" width="160" alt="余额-数金皱眉">
+  <img src="dsh-pet/assets/preview/dai-kong-ru-xi.gif" width="160" alt="余额-袋空如洗">
+  <img src="dsh-pet/assets/preview/fen-wen-bu-sheng.gif" width="160" alt="余额-分文不剩">
 </p>
 
-**文字**
+**碎碎念 / 工作状态**
 
 <p>
-  <img src="dsh-pet/assets/preview/shia-chishenme.gif" width="160" alt="是啊，吃什么" title="是啊，吃什么">
-  <img src="dsh-pet/assets/preview/shendu-sikao-suisuinian.gif" width="160" alt="深度思考碎碎念" title="深度思考碎碎念">
+  <img src="dsh-pet/assets/preview/suisuinian-duiping-suisuinian.gif" width="160" alt="碎碎念-对屏碎碎念">
+  <img src="dsh-pet/assets/preview/suisuinian-fadai-suisuinian.gif" width="160" alt="碎碎念-发呆碎碎念">
+  <img src="dsh-pet/assets/preview/gongzuozhuangtai-sikao-maopao.gif" width="160" alt="工作状态-思考冒泡">
+  <img src="dsh-pet/assets/preview/gongzuozhuangtai-manglu-dianan.gif" width="160" alt="工作状态-忙碌点按">
+  <img src="dsh-pet/assets/preview/gongzuozhuangtai-queyue-qingzhu.gif" width="160" alt="工作状态-雀跃庆祝">
+  <img src="dsh-pet/assets/preview/gongzuozhuangtai-chuitou-tanqi-maohan.gif" width="160" alt="工作状态-垂头叹气冒汗">
 </p>
 
-**点击回应**
+做自己的角色：从提示词到透明 webm 的步骤在 [MAKE-YOUR-OWN-PET.md](MAKE-YOUR-OWN-PET.md)。那条管线会改素材，和「把现成补丁跑起来」是两条路。
 
-<p>
-  <img src="dsh-pet/assets/preview/dianji-huiying-kaixin-yuedong.gif" width="160" alt="点击回应-开心跃动" title="点击回应-开心跃动">
-  <img src="dsh-pet/assets/preview/dianji-huiying-haixiu-jingya.gif" width="160" alt="点击回应-害羞惊讶" title="点击回应-害羞惊讶">
-  <img src="dsh-pet/assets/preview/dianji-huiying-aojiao-shengqi-ceshen-zhanshi.gif" width="160" alt="点击回应-傲娇生气" title="点击回应-傲娇生气">
-  <img src="dsh-pet/assets/preview/dianji-huiying-naoyang-gegexiao.gif" width="160" alt="点击回应-挠痒咯咯笑" title="点击回应-挠痒咯咯笑">
-  <img src="dsh-pet/assets/preview/dianji-huiying-yuanqi-huishou.gif" width="160" alt="点击回应-元气挥手" title="点击回应-元气挥手">
-</p>
+---
 
-**拖拽**
+<a id="english"></a>
 
-<p>
-  <img src="dsh-pet/assets/preview/beishubiao-tuozhuai-xuankong-fankui.gif" width="160" alt="被鼠标拖拽悬空反馈" title="被鼠标拖拽悬空反馈">
-</p>
+## English
 
-**余额事件**（按余额已用百分比分档，满格 → 告急 → 耗尽）
+Community patch of [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet) v0.3.8. It is a desktop whale-maid pet (animations, click, drag, throw, balance, chat). This checkout runs **without DeepSeek Harness**, via the standalone CLI. Patches live in committed build artifacts, not in `src/`.
 
-<p>
-  <img src="dsh-pet/assets/preview/qian-dai-man-yi.gif" width="160" alt="余额-钱袋满溢" title="余额-钱袋满溢">
-  <img src="dsh-pet/assets/preview/jin-dai-ding-dang.gif" width="160" alt="余额-金袋叮当" title="余额-金袋叮当">
-  <img src="dsh-pet/assets/preview/qian-dai-ru-chang.gif" width="160" alt="余额-钱袋如常" title="余额-钱袋如常">
-  <img src="dsh-pet/assets/preview/shu-jin-zhou-mei.gif" width="160" alt="余额-数金皱眉" title="余额-数金皱眉">
-  <img src="dsh-pet/assets/preview/dai-kong-ru-xi.gif" width="160" alt="余额-袋空如洗" title="余额-袋空如洗">
-  <img src="dsh-pet/assets/preview/fen-wen-bu-sheng.gif" width="160" alt="余额-分文不剩" title="余额-分文不剩">
-</p>
-
-**碎碎念说话动画**（碎碎念 / 对话回复触发，随机抽 1 段）
-
-<p>
-  <img src="dsh-pet/assets/preview/suisuinian-cazhuo-suisuinian.gif" width="160" alt="碎碎念-擦桌碎碎念" title="碎碎念-擦桌碎碎念">
-  <img src="dsh-pet/assets/preview/suisuinian-fadai-suisuinian.gif" width="160" alt="碎碎念-发呆碎碎念" title="碎碎念-发呆碎碎念">
-  <img src="dsh-pet/assets/preview/suisuinian-duiping-suisuinian.gif" width="160" alt="碎碎念-对屏碎碎念" title="碎碎念-对屏碎碎念">
-</p>
-
-**工作状态动画**（跟随 DSH 会话事件，六档：思考 / 工作 / 整理 / 等待 / 成功 / 出错）
-
-<p>
-  <img src="dsh-pet/assets/preview/gongzuozhuangtai-sikao-maopao.gif" width="160" alt="工作状态-思考冒泡" title="工作状态-思考冒泡">
-  <img src="dsh-pet/assets/preview/gongzuozhuangtai-manglu-dianan.gif" width="160" alt="工作状态-忙碌点按" title="工作状态-忙碌点按">
-  <img src="dsh-pet/assets/preview/gongzuozhuangtai-qingdian-guidang.gif" width="160" alt="工作状态-清点归档" title="工作状态-清点归档">
-  <img src="dsh-pet/assets/preview/gongzuozhuangtai-yuandi-duobu-zhangwang.gif" width="160" alt="工作状态-原地踱步张望" title="工作状态-原地踱步张望">
-  <img src="dsh-pet/assets/preview/gongzuozhuangtai-queyue-qingzhu.gif" width="160" alt="工作状态-雀跃庆祝" title="工作状态-雀跃庆祝">
-  <img src="dsh-pet/assets/preview/gongzuozhuangtai-chuitou-tanqi-maohan.gif" width="160" alt="工作状态-垂头叹气冒汗" title="工作状态-垂头叹气冒汗">
-</p>
-
-> 注：动画为透明背景；GIF 预览中透明部分显示为页面底色，实际 webm 播放为透明。
-
-## 从零生成你自己的宠物
-
-AI 提示词 → 绿幕视频 → 透明动画 → 插件，换角色、换动作、换风格，全流程可复现。
-
-完整步骤见 **[MAKE-YOUR-OWN-PET.md](MAKE-YOUR-OWN-PET.md)**（提示词配方、素材链、Safari 兼容、发布）。
-
-## 项目结构
-
-只列代码与发布相关目录；素材链的 video / scripts / step / pr 见 [MAKE-YOUR-OWN-PET.md](MAKE-YOUR-OWN-PET.md) 的 ② 章节（gitignore 的本地目录不列）：
-
-```
-├── README.md  MAKE-YOUR-OWN-PET.md  CONFIG.md  API.md  CORDIS.md  openapi.yaml   # 说明 / 宠物制作指南 / 配置 / HTTP 接口 / Cordis 服务 / OpenAPI 规范
-├── prompts/           # ① 动画生成提示词配方（绿幕规范 + 按秒分解）
-├── assets/            # 仓库展示用截图
-├── tools/             # 开发工具：API 调试页、cordis-probe mock 服务商、DPI 探针
-├── .github/workflows/ # CI：Safari/HEVC 转码流水线（macOS runner，手动触发 → 发布 assets-mov Release）
-├── dsh-pet/           # ③ 插件（可独立 npm 发布）
-│   ├── src/
-│   │   ├── host/       # 宿主半侧：配置 / 路由 / 余额 / 工作状态
-│   │   ├── client/     # 浏览器半侧：宠物渲染 / 动画链 / 设置页
-│   │   ├── shared/     # 双端共用纯逻辑（物理 / 菜单 / 取数）
-│   │   └── standalone/ # 独立模式 CLI（不依赖 DSH 直接跑桌宠）
-│   ├── lib/            # 构建产物（npm run build 生成，不入库）
-│   ├── runtime/        # 桌面模式运行壳（Electron 透明窗）
-│   ├── assets/         # webm 动画 / preview GIF / 字体 / 图标 / config.jsonc 默认配置
-│   └── scripts/        # 构建、发布与开发脚本
-└── LICENSE             # MIT
+```sh
+git clone https://github.com/Tomhao10225101490/dsh-pet-patched.git
+cd dsh-pet-patched/dsh-pet
+pnpm install --frozen-lockfile
+node lib/standalone.js --check
+node lib/standalone.js
 ```
 
-## 💬 反馈与发版节奏
+Requirements: macOS with a GUI, Node.js `>= 22.12`. Electron 43.3.0 is downloaded on first launch to `$DSH_HOME/electron` (default `~/.dsh/electron`). Do not run `npm run build`; it regenerates `lib/` from unpatched `src/` and drops the standalone balance provider, the pinned balance pill, the display-only KRW conversion, double-click chat, and the longer chat prompt.
 
-欢迎提 [issue](https://github.com/PC2005-cloud/dsh-pet/issues) 与 PR——bug、体验问题随时反馈。**新功能请先开 issue** 说明使用场景，由维护者判断是否实现、以及放在插件本体还是作为第三方扩展，不要在确认前直接提交实现 PR。与桌宠本身关系不大、或实现特别复杂的功能，通常不会进本体，而是通过现有接口由第三方扩展实现。动手前也请先翻一眼 [提交记录](https://github.com/PC2005-cloud/dsh-pet/commits/main)，确认不是已经修掉的同款问题（有些问题可能已经在 `main` 上修好了，只是还没发版）。
+Right-click the pet and choose **打开 AI 设置**. The API key is stored only in `$DSH_HOME/dsh-pet/standalone-ai.json` (mode `0600`). Never commit that file. Balance works only when `baseUrl` contains `api.deepseek.com`. The `¥` figure is a display conversion (USD × 1325, CNY × 187, rounded), not the raw wallet balance.
 
-- **小修不单独发版**：不影响使用的小 bug 与优化会**累计**到下一个版本一起发，避免版本更迭过于频繁。所以「`main` 上已经修了」不等于「你装的这版已经包含」——`latest` 没更新时，以 `main` 的提交记录为准。
-- **想立刻用上未发布的修复**：按上面的「从源码安装」把插件指向本地仓库即可；注意**宿主半侧**的代码改动要**重开 DSH** 才生效（浏览器半侧刷新页面即可）。
-- **报 bug 时请带上**：插件版本、`dsh` 版本、操作系统、复现步骤（有日志或截图更好）。
+`lib/index.js` is not in this checkout, so `dsh plugin add` against this tree is not a working install path until the patches are ported back into `src/`. See [PATCHES.md](PATCHES.md) and [docs/architecture.md](docs/architecture.md).
 
-## 许可
-
-- 代码：MIT
-- 素材（动画/提示词/源视频）：允许开源使用，**禁止商用**
-- **二次创作（二创）约定**：基于本项目的衍生 / 改版 / 换皮作品，在 **GitHub 仓库、产品官网等公开渠道**上须附上原作者 GitHub 地址：<https://github.com/PC2005-cloud/dsh-pet>
-- **形象出处**：宠物形象为社区二创的 DeepSeek「大肥鱼」（鲸鱼娘），**非 DeepSeek 官方形象**；原型「溟月」出自 B 站 [@上善无形](https://space.bilibili.com/4456176)，DeepSeek 版（女仆鲸鱼娘）设计出自 B 站 [@ZipZipPipe](https://space.bilibili.com/4168597)
-- **形象授权**：[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans)（署名 · 非商业 · 相同方式共享），[声明原文](https://www.bilibili.com/opus/1247156596114456581)：「大肥鱼是遵守CC BY-NC-SA 4.0协议的形象，不可以以任何形式商业化。若您非常喜爱该形象，希望其拥有实体，您可以自行定制。」
+License: MIT for code; assets are non-commercial; the character is CC BY-NC-SA 4.0. Keep the upstream attribution: https://github.com/PC2005-cloud/dsh-pet
