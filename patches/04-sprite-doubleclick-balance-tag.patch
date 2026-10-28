@@ -1,0 +1,38 @@
+--- /home/hatch/workspace/pet-package/diff/sprite_orig.js	2026-10-28 14:27:19.319830720 +0800
++++ /home/hatch/workspace/pet-package/diff/sprite_patched.js	2026-10-28 14:27:19.318268195 +0800
+@@ -231,6 +231,7 @@
+     this.hit.addEventListener('pointerdown', (e) => this.onPointerDown(e), { signal: ac.signal });
+     this.hit.addEventListener('pointermove', (e) => this.onPointerMove(e), { signal: ac.signal });
+     this.hit.addEventListener('click', (e) => this.onClick(e), { signal: ac.signal });
++    this.hit.addEventListener('dblclick', (e) => this.onDoubleClick(e), { signal: ac.signal });
+     this.hit.addEventListener('contextmenu', (e) => this.onContextMenu(e), { signal: ac.signal });
+     window.addEventListener('pointerup', (e) => this.onPointerUp(e), { signal: ac.signal });
+     window.addEventListener('pointercancel', (e) => this.onPointerUp(e), { signal: ac.signal });
+@@ -1588,6 +1589,17 @@
+     this.playOnce(S.pick(this.animations.clicks));
+   }
+ 
++  // 双击宠物直接打开对话（与右键菜单「对话」同一弹窗；已开着时不重复、不关闭）。
++  // 注意：双击前两次单击动画照样会播一次——这是浏览器/DOM 的固有顺序，
++  // 不是故障；对话窗打开后，单击动画不影响输入。
++  onDoubleClick(e) {
++    const d = this.dragState;
++    if (d.active || d.dragging || this.justDragged) return;
++    if (isOpenShortcut(e)) return; // Cmd+双击仍是呼出 DSH 的快捷键，不抢成对话
++    if (this.chatOpen) return;
++    this.showChatFromMenu();
++  }
++
+   // ---- 右键菜单（统一自绘组件：树+渲染都来自 shared-core 的同一份 menu 模块） ----
+   // 菜单/弹窗可视矩形（窗口局部坐标）= 窗口 ∩ 工作区（#41）：宠物贴屏幕底/右时窗口外扩余量
+   // 伸出屏幕，窗口内固定定位的菜单/弹窗会走进被屏幕裁掉的部分。把菜单/弹窗约束到这个矩形内
+@@ -1888,6 +1900,9 @@
+       slot === 'whisper' || slot === 'work' || (slot === 'balance' && this.balanceWrap),
+     );
+     this.bubble.classList.toggle(S.MEME_BUBBLE_CLASS, !!whisperImg);
++    // 余额小标签：收起态的余额不再用大白泡泡，改成头顶小药丸（见 index.html .pet-bubble.is-balance）；
++    // 展开态（三窗口完整读数）不套小标签，保持原来的大盒子排版。
++    this.bubble.classList.toggle('is-balance', slot === 'balance' && !this.balanceExpanded);
+     // 可点/展开两个状态类：可点 → 气泡参与命中区（见 syncInputRegions）；展开 → 三窗口排版与更宽的盒
+     const clickable = slot === 'balance' && this.balanceClickable();
+     this.bubble.classList.toggle('is-clickable', clickable);

@@ -1,0 +1,46 @@
+--- /home/hatch/workspace/pet-package/diff/events_orig.js	2026-10-28 14:27:47.235468829 +0800
++++ /home/hatch/workspace/pet-package/diff/events_patched.js	2026-10-28 14:27:47.233363860 +0800
+@@ -128,11 +128,9 @@
+   this.balanceState = state; // 留着：不可用状态不可展开，但要防止上一次的余额读数残留在字段里
+   this.balanceExpanded = false; // 文字说明没有展开态
+   this.renderBubble();
++  // 与成功余额一致：常驻，不再 10s 自动收起。
+   if (this.bubbleTimer !== null) window.clearTimeout(this.bubbleTimer);
+-  this.bubbleTimer = window.setTimeout(() => {
+-    this.bubbleOn = false;
+-    this.renderBubble();
+-  }, BUBBLE_DURATION_MS);
++  this.bubbleTimer = null;
+ };
+ 
+ // ---- 碎碎念 / 命令气泡 / 对话回复 / 清空（**四合一**）：不再各自轮询 ----
+@@ -219,12 +217,10 @@
+   this.balanceState = state; // 展开态要拿完整读数现算三窗口行（balanceView 只是收起态那两行）
+   this.balanceExpanded = false; // 新一轮查询一律从收起态开始（与浏览器一致）
+   this.renderBubble();
+-  // 气泡 10s 定时消失（与动画解耦：即使动画被点击/拖拽打断，气泡也按时收起；重复触发先清旧定时器）
++  // 余额气泡常驻头顶：不再设 10s 自动收起，下一轮刷新直接更新数字；
++  // 对话/碎碎念气泡优先级更高，弹出来时会暂时盖住余额，结束后余额自动回来。
+   if (this.bubbleTimer !== null) window.clearTimeout(this.bubbleTimer);
+-  this.bubbleTimer = window.setTimeout(() => {
+-    this.bubbleOn = false;
+-    this.renderBubble();
+-  }, BUBBLE_DURATION_MS);
++  this.bubbleTimer = null;
+   // 档位动画：开关关闭的宠物不演；没有百分比语义（纯余额金额）也没有档位可映射
+   if (!this.pet.balanceEnabled) return;
+   if (p === undefined) return;
+@@ -260,11 +256,9 @@
+     this.bubble.classList.remove('is-fading');
+     this.renderBubble(); // 重绘内容 + 重报控件矩形（展开态宽度变了，矩形也得跟着变）
+   }, BALANCE_FADE_MS);
++  // 余额气泡常驻：点开/收起不再设 10s 自动收起。
+   if (this.bubbleTimer !== null) window.clearTimeout(this.bubbleTimer);
+-  this.bubbleTimer = window.setTimeout(() => {
+-    this.bubbleOn = false;
+-    this.renderBubble();
+-  }, BUBBLE_DURATION_MS);
++  this.bubbleTimer = null;
+ };
+ 
+ // ---------- 轮询组装（容器统一拉取/触发，与浏览器 PetMulti 同一套路径；boot 成功后调用） ----------

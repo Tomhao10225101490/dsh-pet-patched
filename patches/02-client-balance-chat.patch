@@ -1,0 +1,184 @@
+--- /home/hatch/workspace/pet-package/diff/client_orig.js	2026-10-28 14:27:07.159035929 +0800
++++ /home/hatch/workspace/pet-package/diff/client_patched.js	2026-10-28 14:27:07.154330808 +0800
+@@ -243,34 +243,25 @@
+ 	return Math.max(0, Math.min(100, 100 - remaining * 100));
+ }
+ /**
+-* money：一行「余额（峰/谷）¥x.xx」。
++* money：一行「余额 ¥x.xx」（用户要求：不再显示峰/谷档位括号）。
+ *
+ * 只显示 `total !== 0` 的币种（**负数要显示**——透支是真的欠钱；正好 0 的不占地方），
+ * CNY 优先，用符号拼、`/` 分隔；全都为 0 时兜底显示主币种 ¥0.00（否则气泡会空一行）。
+-* 档位装饰（峰/谷）只有提供该计价规则的服务商才有；没有就不加括号那一段。
+ */
+ function moneyRows(v) {
++	// 仅显示：数字按韩元换算（USD × 1325、CNY × 187，2026-10-27 汇率，取整数），符号仍用 ¥（人民币符号），不改底层钱包金额和币种。
++	const toKRW = (w) => {
++		const total = Number(w.total);
++		if (w.currency === "USD") return "¥" + Math.round(total * 1325);
++		if (w.currency === "CNY") return "¥" + Math.round(total * 187);
++		return "¥" + w.total;
++	};
+ 	const visible = (v.wallets ?? []).filter((w) => Number(w.total) !== 0).sort((a, b) => (a.currency === "CNY" ? 0 : 1) - (b.currency === "CNY" ? 0 : 1));
+-	const amount = visible.length > 0 ? visible.map((w) => (w.currency === "USD" ? "$" : "¥") + w.total).join("/") : "¥0.00";
+-	if (!v.tier) return [{
++	const amount = visible.length > 0 ? visible.map(toKRW).join("/") : "¥0";
++	return [{
+ 		role: "label",
+ 		text: "余额 " + amount
+ 	}];
+-	return [
+-		{
+-			role: "label",
+-			text: "余额（"
+-		},
+-		{
+-			role: "tier",
+-			tier: v.tier,
+-			text: v.tier === "peak" ? "峰" : "谷"
+-		},
+-		{
+-			role: "label",
+-			text: "）" + amount
+-		}
+-	];
+ }
+ const moneyHandler = {
+ 	percent: moneyPercent,
+@@ -781,7 +772,9 @@
+ 	".dsh-pet-bubble .pet-bub-quota-fill.pet-bub-quota-warn{background:#e8952f}",
+ 	".dsh-pet-bubble .pet-bub-quota-fill.pet-bub-quota-crit{background:#e53935}",
+ 	".dsh-pet-bubble .pet-bub-quota-used{flex:none;min-width:calc(var(--f)*2.2);text-align:right;font-variant-numeric:tabular-nums;font-weight:650;color:#1f1f1f}",
+-	".dsh-pet-bubble .pet-bub-quota-reset{flex:none;min-width:calc(var(--f)*2.6);text-align:right;font-size:calc(var(--f)*0.7692);color:rgba(43,43,43,.6)}"
++	".dsh-pet-bubble .pet-bub-quota-reset{flex:none;min-width:calc(var(--f)*2.6);text-align:right;font-size:calc(var(--f)*0.7692);color:rgba(43,43,43,.6)}",
++	".dsh-pet-bubble.is-balance{bottom:calc(100% - var(--dsh-pet-size)*0.22);min-width:0;padding:3px 10px;border-radius:999px;font-size:calc(var(--f)*0.8);line-height:1.4;box-shadow:0 2px 8px rgba(0,0,0,.14)}",
++	".dsh-pet-bubble.is-balance::after{display:none}"
+ ].join("\n");
+ /** 只注入一次 */
+ function injectBubbleCss() {
+@@ -879,7 +872,7 @@
+ 		const clickable = state.ok && state.shape === "windows";
+ 		const wrap = state.ok ? "" : " dsh-pet-whisper";
+ 		return h("div", {
+-			className: "dsh-pet-bubble" + wrap + (on ? " is-on" : "") + (clickable ? " is-clickable" : "") + (full ? " is-expanded" : "") + (fading ? " is-fading" : ""),
++			className: "dsh-pet-bubble" + wrap + (on ? " is-on" : "") + (clickable ? " is-clickable" : "") + (full ? " is-expanded" : " is-balance") + (fading ? " is-fading" : ""),
+ 			onClick: clickable ? (e) => {
+ 				e.stopPropagation();
+ 				onToggle();
+@@ -1431,15 +1424,16 @@
+ 	".dsh-pet-chat *{box-sizing:border-box}",
+ 	".dsh-pet-chat-input{display:block;width:100%;border:none;outline:none;background:transparent;",
+ 	"padding:8px 11px 9px;font-size:14px;line-height:1.45;color:#2b2b2b;font-family:inherit;",
+-	"resize:none;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere}",
++	"resize:none;overflow-x:hidden;overflow-y:auto;max-height:320px;white-space:pre-wrap;overflow-wrap:anywhere}",
+ 	".dsh-pet-chat-input::placeholder{color:rgba(43,43,43,.45)}",
+ 	".dsh-pet-chat-input:disabled{opacity:.55}",
+ 	".dsh-pet-chat-err{color:#d94f3d;font-size:12px;padding:0 12px 8px;white-space:pre-wrap;overflow-wrap:anywhere}"
+ ].join("");
+ /** 输入框宽度自适应参数：初始小宽 → 随文本增宽 → 封顶后折行增高 */
+-const CHAT_MIN_W = 160;
+-const CHAT_MAX_W = 340;
++const CHAT_MIN_W = 320;
++const CHAT_MAX_W = 480;
+ const CHAT_H_PAD = 22;
++const CHAT_MAX_H = 320;
+ let chatCssInjected = false;
+ function injectChatCss() {
+ 	if (chatCssInjected || typeof document === "undefined") return;
+@@ -1474,12 +1468,20 @@
+ 		ctx.font = getComputedStyle(input).font;
+ 		return ctx.measureText(text).width;
+ 	};
++	let chatPlaced = false;
+ 	const resizeInput = () => {
+ 		const textW = measureText(input.value || " ");
+ 		const w = Math.max(CHAT_MIN_W, Math.min(Math.ceil(textW + CHAT_H_PAD), CHAT_MAX_W));
+ 		root.style.width = w + "px";
+ 		input.style.height = "auto";
+-		input.style.height = Math.max(input.scrollHeight, 22) + "px";
++		input.style.height = Math.min(Math.max(input.scrollHeight, 22), CHAT_MAX_H) + "px";
++		if (chatPlaced && root.isConnected) {
++			const r = root.getBoundingClientRect();
++			const left = parseFloat(root.style.left);
++			const top = parseFloat(root.style.top);
++			if (Number.isFinite(left)) root.style.left = Math.max(c.x + 4, Math.min(left, c.x + c.w - r.width - 4)) + "px";
++			if (Number.isFinite(top)) root.style.top = Math.max(c.y + 4, Math.min(top, c.y + c.h - r.height - 4)) + "px";
++		}
+ 	};
+ 	input.addEventListener("input", resizeInput);
+ 	resizeInput();
+@@ -1493,6 +1495,7 @@
+ 	const rr = root.getBoundingClientRect();
+ 	root.style.left = Math.max(c.x + 4, Math.min(x, c.x + c.w - rr.width - 4)) + "px";
+ 	root.style.top = Math.max(c.y + 4, Math.min(y, c.y + c.h - rr.height - 4)) + "px";
++	chatPlaced = true;
+ 	let closed = false;
+ 	let sending = false;
+ 	const close = () => {
+@@ -4018,7 +4021,7 @@
+ 				setBalanceExpanded(false);
+ 				setBubbleOn(true);
+ 				if (bubbleTimerRef.current !== null) window.clearTimeout(bubbleTimerRef.current);
+-				bubbleTimerRef.current = window.setTimeout(() => setBubbleOn(false), BUBBLE_DURATION_MS);
++				bubbleTimerRef.current = null;
+ 			}
+ 			if (!cfg.balanceEnabled) return;
+ 			if (p === void 0) return;
+@@ -4048,7 +4051,7 @@
+ 			if (!balance || balance.ok) return;
+ 			setBubbleOn(true);
+ 			if (bubbleTimerRef.current !== null) window.clearTimeout(bubbleTimerRef.current);
+-			bubbleTimerRef.current = window.setTimeout(() => setBubbleOn(false), BUBBLE_DURATION_MS);
++			bubbleTimerRef.current = null;
+ 		}, [balanceNoticeTick]);
+ 		const prevWorkTickRef = useRef(0);
+ 		const prevWorkStateRef = useRef(void 0);
+@@ -5022,6 +5025,26 @@
+ 			setSeq((s) => s + 1);
+ 			setAnim(name);
+ 		};
++		/** 双击宠物直接打开对话（与右键菜单「对话」同一弹窗；已开着时不重复、不关闭） */
++		const handleDoubleClick = () => {
++			const d = dragRef.current;
++			if (d.active || d.dragging || justDraggedRef.current) return;
++			if (chatRef.current) return;
++			const hitRect = stageRef.current?.querySelector(".dsh-pet-hit")?.getBoundingClientRect();
++			chatRef.current = mountChatDialog({
++				petId: cfg.id,
++				baseUrl: "/dsh-pet-7340/chat",
++				surface: "web",
++				x: hitRect ? hitRect.right + 6 : window.innerWidth - 256,
++				y: hitRect ? hitRect.top + 6 : 8,
++				onSent: () => {
++					console.info("[dsh-pet] 对话已发送 pet=" + cfg.id);
++				},
++				onClose: () => {
++					chatRef.current = null;
++				}
++			});
++		};
+ 		/** `keepFacing` = 调用方已**显式指定**朝向（POST /anim 的 facing）：跳过下面"文字类动画
+ 		*  点播前强制朝左"那条镜像修正——显式值优先。右键菜单点播不传（保持原语义）。 */
+ 		const handleMenuAction = (leaf$1, playbackId, keepFacing = false) => {
+@@ -5164,12 +5187,9 @@
+ 				bottom: "auto"
+ 			};
+ 		})() : {};
+-		/** 点余额气泡：切换展开/收起，并把 10s 计时器重置一次
+-		*  （不重置的话，第 8 秒才点开就只剩 2 秒，"看完整信息"这个目的就落空了） */
++		/** 点余额气泡：切换展开/收起（余额气泡常驻，不再设 10s 自动收起） */
+ 		const toggleBalanceDetail = () => {
+ 			setBalanceExpanded((v) => !v);
+-			if (bubbleTimerRef.current !== null) window.clearTimeout(bubbleTimerRef.current);
+-			bubbleTimerRef.current = window.setTimeout(() => setBubbleOn(false), BUBBLE_DURATION_MS);
+ 		};
+ 		const workTerminal = workStatus?.state === "success" || workStatus?.state === "error";
+ 		const bubbleNode = (() => {
+@@ -5210,6 +5230,7 @@
+ 				height: (HIT_BOX.y1 - HIT_BOX.y0) / 360 * 100 + "%"
+ 			},
+ 			onClick: handleClick,
++			onDoubleClick: handleDoubleClick,
+ 			onPointerDown: handlePointerDown,
+ 			onPointerMove: handlePointerMove,
+ 			onPointerUp: handlePointerUp,

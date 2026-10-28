@@ -1,0 +1,75 @@
+--- /home/hatch/workspace/pet-package/diff/standalone_orig.js	2026-10-28 14:27:07.147829852 +0800
++++ /home/hatch/workspace/pet-package/diff/standalone_patched.js	2026-10-28 14:27:07.144887711 +0800
+@@ -1177,6 +1177,53 @@
+ 		};
+ 	}
+ };
++// 本地补丁：独立模式也能查 DeepSeek 余额，不用装 DSH。
++// 独立模式的 provider id 是 "standalone"，原代码没有给它登记余额接口，所以永远报 unsupported。
++// 这里给它登记一个：不走 DSH 凭据，直接读本机 AI 设置里保存的 DeepSeek 密钥，调官方余额接口，
++// 返回格式和 deepseek-official 一模一样，所以宠物自带的余额动画 + 气泡照常工作。
++// 密钥只在本机读，不打印、不外发；接口地址不是 DeepSeek 官方时直接报错，不乱查。
++const standaloneBalance = {
++	id: "standalone",
++	async fetch({ provider }) {
++		let key = "";
++		let baseUrl = "";
++		try {
++			const saved = JSON.parse(readFileSync(join(dshHomeDir(), "dsh-pet", "standalone-ai.json"), "utf8"));
++			key = typeof saved.apiKey === "string" ? saved.apiKey.trim() : "";
++			baseUrl = typeof saved.baseUrl === "string" ? saved.baseUrl : "";
++		} catch {
++			throw new Error("dsh-pet: 独立模式未配置 DeepSeek 密钥（请先在宠物 AI 设置里保存）");
++		}
++		if (!key) throw new Error("dsh-pet: 独立模式未配置 DeepSeek 密钥（请先在宠物 AI 设置里保存）");
++		if (!baseUrl.includes("api.deepseek.com")) throw new Error("dsh-pet: 当前 AI 接口不是 DeepSeek 官方，独立模式余额查询不支持");
++		const res = await fetchWithRetry("https://api.deepseek.com/user/balance", key);
++		if (!res.ok) throw new Error("deepseek balance HTTP " + res.status);
++		const body = await res.json();
++		const infos = body?.balance_infos;
++		if (!Array.isArray(infos) || infos.length === 0) throw new Error("dsh-pet: deepseek balance 响应缺少 balance_infos");
++		const wallets = infos.map((raw) => {
++			const w = obj(raw) ?? {};
++			const currency = str(w.currency, "currency");
++			const fullBalance = deepseekFullBalance(currency);
++			return {
++				currency,
++				total: str(w.total_balance, "total_balance"),
++				granted: str(w.granted_balance, "granted_balance"),
++				toppedUp: str(w.topped_up_balance, "topped_up_balance"),
++				...fullBalance === void 0 ? {} : { fullBalance }
++			};
++		});
++		return {
++			ok: true,
++			provider,
++			shape: "money",
++			data: {
++				wallets,
++				tier: deepseekPricingTier()
++			}
++		};
++	}
++};
+ 
+ //#endregion
+ //#region src/host/balance/providers/opencode-go.ts
+@@ -1229,7 +1276,8 @@
+ 	opencodeGo,
+ 	commandCode,
+ 	deepseekOfficial,
+-	deepseekAccount
++	deepseekAccount,
++	standaloneBalance
+ ];
+ /** 第三方运行时注册：provider id → 定义。 */
+ const external = new Map();
+@@ -4144,7 +4192,7 @@
+ 			message: "没有这只桌宠：" + petId
+ 		};
+ 		const rounds = memoryRounds(found.conf);
+-		const system = petSystemPrompt(found);
++		const system = petSystemPrompt(found) + " 【对话特别说明】上面“20字以内、短短一句”只适用于碎碎念，不适用于对话。对话时请像专业 Agent 一样详细、完整、结构清晰地回答，充分展开步骤、理由和例子，不要故意缩短；除非用户明确要求简短，否则不要只回一句话。";
+ 		const pool = found.conf.chatImageEnabled === true ? limitPool(readMemePool(found.conf.memes, memeDirsFor(found.entry)), Number(found.conf.chatImageLimit)) : [];
+ 		const mem = await readMemory();
+ 		const bucket = mem[found.entry] ??= {};
